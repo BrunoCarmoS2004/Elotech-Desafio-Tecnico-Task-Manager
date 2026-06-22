@@ -13,7 +13,7 @@ CREATE TABLE users (
 
 CREATE TABLE projects (
       id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-      name VARCHAR(100) NOT NULL,
+      name VARCHAR(100) UNIQUE NOT NULL,
       description TEXT,
       creator_id UUID NOT NULL,
       entity_status VARCHAR(30) NOT NULL,
@@ -23,8 +23,10 @@ CREATE TABLE projects (
 );
 
 CREATE TABLE project_members (
+     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
      project_id UUID NOT NULL,
      user_id UUID NOT NULL,
+     user_project_status VARCHAR(30) NOT NULL,
      PRIMARY KEY (project_id, user_id),
      CONSTRAINT fk_project_members_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
      CONSTRAINT fk_project_members_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
