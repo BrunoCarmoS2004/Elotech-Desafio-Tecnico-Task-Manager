@@ -8,10 +8,13 @@ import br.com.elotech.desafio.backend.taskmanager.domain.models.Project;
 import br.com.elotech.desafio.backend.taskmanager.domain.models.ProjectMembers;
 import br.com.elotech.desafio.backend.taskmanager.domain.models.User;
 import br.com.elotech.desafio.backend.taskmanager.domain.repositories.ProjectMembersRepository;
+import br.com.elotech.desafio.backend.taskmanager.domain.repositories.ProjectRepository;
 import br.com.elotech.desafio.backend.taskmanager.exceptions.NotFoundException;
 import br.com.elotech.desafio.backend.taskmanager.mappers.ProjectMembersMapper;
 import br.com.elotech.desafio.backend.taskmanager.utils.MessageUtils;
 import br.com.elotech.desafio.backend.taskmanager.validation.ProjectMembersValidation;
+import br.com.elotech.desafio.backend.taskmanager.validation.ProjectValidation;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
@@ -25,15 +28,17 @@ public class ProjectMembersService {
     private final ProjectMembersRepository projectMembersRepository;
     private final ProjectMembersMapper projectMembersMapper;
     private final ProjectMembersValidation projectMembersValidation;
-    private final ProjectService projectService;
+    private final ProjectRepository projectRepository;
+    private final ProjectValidation projectValidation;
     private final UserService userService;
     private final MessageUtils messageUtils;
 
-    public ProjectMembersService(ProjectMembersRepository projectMembersRepository, ProjectMembersMapper projectMembersMapper, ProjectMembersValidation projectMembersValidation, ProjectService projectService, UserService userService, MessageUtils messageUtils) {
+    public ProjectMembersService(ProjectMembersRepository projectMembersRepository, ProjectMembersMapper projectMembersMapper, ProjectMembersValidation projectMembersValidation, ProjectRepository projectRepository, ProjectValidation projectValidation, UserService userService, MessageUtils messageUtils) {
         this.projectMembersRepository = projectMembersRepository;
         this.projectMembersMapper = projectMembersMapper;
         this.projectMembersValidation = projectMembersValidation;
-        this.projectService = projectService;
+        this.projectRepository = projectRepository;
+        this.projectValidation = projectValidation;
         this.userService = userService;
         this.messageUtils = messageUtils;
     }
@@ -46,14 +51,12 @@ public class ProjectMembersService {
         return new PagedModel<>(projectMembersRepository.findAllByProjectId(projectId, pageable));
     }
 
-    public ProjectMembersGetDTO getProjectMembersById(UUID id) {
-        return projectMembersRepository.findById(id, ProjectMembersGetDTO.class).orElseThrow(
-                () -> new NotFoundException(messageUtils.getMessage("project-members.not-found"))
-        );
+    public PagedModel<ProjectMembersGetDTO> getAllProjectMembersByMemberId(UUID memberId, Pageable pageable) {
+        return new PagedModel<>(projectMembersRepository.findAllByUserId(memberId, pageable));
     }
 
-    public ProjectMembersGetDTO getProjectMembersByMemberId(UUID memberId) {
-        return projectMembersRepository.findByUserId(memberId, ProjectMembersGetDTO.class).orElseThrow(
+    public ProjectMembersGetDTO getProjectMembersById(UUID id) {
+        return projectMembersRepository.findById(id, ProjectMembersGetDTO.class).orElseThrow(
                 () -> new NotFoundException(messageUtils.getMessage("project-members.not-found"))
         );
     }
@@ -72,7 +75,7 @@ public class ProjectMembersService {
     }
 
     private void createProjectMembers(ProjectMembersPostDTO projectMembersPostDTO, List<ProjectMembers> members) {
-        Project referenceProject = projectService.getReferenceById(projectMembersPostDTO.projectId());
+        Project referenceProject = projectRepository.getReferenceById(projectMembersPostDTO.projectId());
         projectMembersPostDTO.memberIds().forEach(member ->{
             User referenceUser = userService.getReferenceById(member);
             ProjectMembers projectMembers = new ProjectMembers(referenceProject, referenceUser);
@@ -81,7 +84,7 @@ public class ProjectMembersService {
     }
 
     private void projectMembersValidations(ProjectMembersPostDTO projectMembersPostDTO) {
-        projectService.validateProjectExists(projectMembersPostDTO.projectId());
+        projectValidation.projectExistsById(projectMembersPostDTO.projectId());
         userService.validateUsersExists(projectMembersPostDTO.memberIds());
     }
 }

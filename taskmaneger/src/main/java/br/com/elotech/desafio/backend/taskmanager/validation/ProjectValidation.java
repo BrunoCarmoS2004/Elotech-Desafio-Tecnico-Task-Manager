@@ -19,7 +19,7 @@ public class ProjectValidation {
     }
 
     public void projectNameExists(String name) {
-        if (projectRepository.findByName(name)){
+        if (projectRepository.existsByName(name)){
             throw new ValidationException(messageUtils.getMessage("project.name.exists"));
         }
     }

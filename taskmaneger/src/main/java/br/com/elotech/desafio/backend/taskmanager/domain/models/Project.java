@@ -1,6 +1,7 @@
 package br.com.elotech.desafio.backend.taskmanager.domain.models;
 
 import br.com.elotech.desafio.backend.taskmanager.domain.Embedded.CommonData;
+import br.com.elotech.desafio.backend.taskmanager.domain.enums.EntityStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -38,7 +39,11 @@ public class Project {
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<ProjectMembers> members = new ArrayList<>();
+    private List<ProjectMembers> members;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "entity_status", nullable = false)
+    private EntityStatus entityStatus = EntityStatus.ACTIVE;
 
     @Embedded
     private CommonData commonData = new CommonData();

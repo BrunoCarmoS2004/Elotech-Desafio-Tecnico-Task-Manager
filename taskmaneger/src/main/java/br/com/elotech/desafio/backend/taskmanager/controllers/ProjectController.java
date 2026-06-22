@@ -7,6 +7,7 @@ import br.com.elotech.desafio.backend.taskmanager.responses.ResponsePayload;
 import br.com.elotech.desafio.backend.taskmanager.services.ProjectService;
 import br.com.elotech.desafio.backend.taskmanager.utils.MessageUtils;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -31,21 +32,21 @@ public class ProjectController {
     }
 
     @GetMapping
-    public ResponseEntity<PagedModel<ProjectGetDTO>> getAll(@PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<PagedModel<ProjectGetDTO>> getAll(@PageableDefault(sort = {"name"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.getAll(pageable));
     }
 
     @GetMapping("/creator/{creatorId}")
     public ResponseEntity<PagedModel<ProjectGetDTO>> getAllByCreator(
             @PathVariable UUID creatorId,
-            @PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(sort = {"name"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.getAllByCreator(creatorId, pageable));
     }
 
     @GetMapping("/member/{memberId}")
     public ResponseEntity<PagedModel<ProjectGetDTO>> getAllByMember(
             @PathVariable UUID memberId,
-            @PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(sort = {"name"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.getAllByMember(memberId, pageable));
     }
 

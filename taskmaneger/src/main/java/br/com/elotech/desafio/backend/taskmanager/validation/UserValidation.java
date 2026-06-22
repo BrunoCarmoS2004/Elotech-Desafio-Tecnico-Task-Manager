@@ -3,6 +3,7 @@ package br.com.elotech.desafio.backend.taskmanager.validation;
 import br.com.elotech.desafio.backend.taskmanager.domain.repositories.UserRepository;
 import br.com.elotech.desafio.backend.taskmanager.exceptions.NotFoundException;
 import br.com.elotech.desafio.backend.taskmanager.exceptions.UnauthorizedException;
+import br.com.elotech.desafio.backend.taskmanager.exceptions.ValidationException;
 import br.com.elotech.desafio.backend.taskmanager.utils.MessageUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -38,7 +39,7 @@ public class UserValidation {
 
     public void userExistsByEmail(String email) {
         if (usuarioRepository.existsByEmail(email)) {
-            throw new NotFoundException(messageUtils.getMessage("user.not-found"));
+            throw new ValidationException(messageUtils.getMessage("user.email.exists"));
         }
     }
 

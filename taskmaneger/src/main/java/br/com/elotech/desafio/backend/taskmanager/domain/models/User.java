@@ -1,6 +1,7 @@
 package br.com.elotech.desafio.backend.taskmanager.domain.models;
 
 import br.com.elotech.desafio.backend.taskmanager.domain.Embedded.CommonData;
+import br.com.elotech.desafio.backend.taskmanager.domain.enums.EntityStatus;
 import br.com.elotech.desafio.backend.taskmanager.domain.enums.Role;
 import br.com.elotech.desafio.backend.taskmanager.security.responses.TokenResponse;
 import jakarta.persistence.*;
@@ -42,6 +43,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "entity_status", nullable = false)
+    private EntityStatus entityStatus = EntityStatus.ACTIVE;
 
     @Embedded
     private CommonData commonData = new CommonData();

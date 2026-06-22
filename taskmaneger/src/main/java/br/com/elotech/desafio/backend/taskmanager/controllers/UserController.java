@@ -5,10 +5,10 @@ import br.com.elotech.desafio.backend.taskmanager.domain.dtos.posts.UserPostDTO;
 import br.com.elotech.desafio.backend.taskmanager.domain.enums.EntityStatus;
 import br.com.elotech.desafio.backend.taskmanager.domain.enums.Role;
 import br.com.elotech.desafio.backend.taskmanager.responses.ResponsePayload;
+import br.com.elotech.desafio.backend.taskmanager.security.dtos.gets.UserWithTokenGetDTO;
 import br.com.elotech.desafio.backend.taskmanager.services.UserService;
 import br.com.elotech.desafio.backend.taskmanager.utils.MessageUtils;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -35,7 +35,7 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<PagedModel<UserGetDTO>> getAll(@PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<PagedModel<UserGetDTO>> getAll(@PageableDefault(sort = {"name"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(usuarioService.getAll(pageable));
     }
 
@@ -51,12 +51,12 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponsePayload<UserGetDTO>> postUser(@Valid @RequestBody UserPostDTO userPostDTO) {
-        UserGetDTO userGetDTO = usuarioService.postUser(userPostDTO);
+    public ResponseEntity<ResponsePayload<UserWithTokenGetDTO>> postUser(@Valid @RequestBody UserPostDTO userPostDTO) {
+        UserWithTokenGetDTO userWithTokenGetDTO = usuarioService.postUser(userPostDTO);
         return createResponse(
                 HttpStatus.CREATED,
-                userGetDTO.id(),
-                userGetDTO,
+                userWithTokenGetDTO.user().id(),
+                userWithTokenGetDTO,
                 messageUtils.getMessage("user.created")
         );
     }

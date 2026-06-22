@@ -8,6 +8,7 @@ import br.com.elotech.desafio.backend.taskmanager.responses.ResponsePayload;
 import br.com.elotech.desafio.backend.taskmanager.services.ProjectMembersService;
 import br.com.elotech.desafio.backend.taskmanager.utils.MessageUtils;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -32,7 +33,7 @@ public class ProjectMembersController {
     }
 
     @GetMapping
-    public ResponseEntity<PagedModel<ProjectMembersGetDTO>> getAll(@PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<PagedModel<ProjectMembersGetDTO>> getAll(Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(projectMembersService.getAll(pageable));
     }
 
@@ -48,19 +49,13 @@ public class ProjectMembersController {
     }
 
     @GetMapping("/project/{projectId}")
-    public ResponseEntity<PagedModel<ProjectMembersGetDTO>> getAllProjectMembersByProjectId(@PathVariable UUID projectId, @PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<PagedModel<ProjectMembersGetDTO>> getAllProjectMembersByProjectId(@PathVariable UUID projectId, @PageableDefault(sort = {"userProjectStatus"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(projectMembersService.getAllProjectMembersByProjectId(projectId, pageable));
     }
 
     @GetMapping("/member/{memberId}")
-    public ResponseEntity<ResponsePayload<ProjectMembersGetDTO>> getProjectMembersByMemberId(@PathVariable UUID memberId) {
-        ProjectMembersGetDTO memberDTO = projectMembersService.getProjectMembersByMemberId(memberId);
-        return createResponse(
-                HttpStatus.OK,
-                memberDTO.id(),
-                memberDTO,
-                messageUtils.getMessage("project-members.found")
-        );
+    public ResponseEntity<PagedModel<ProjectMembersGetDTO>> getProjectMembersByMemberId(@PathVariable UUID memberId, @PageableDefault(sort = {"userProjectStatus"}, direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK).body(projectMembersService.getAllProjectMembersByMemberId(memberId, pageable));
     }
 
     @PostMapping("/add")

@@ -21,9 +21,10 @@ public interface ProjectMembersRepository extends JpaRepository<ProjectMembers, 
     <T> Page<T> findBy(Pageable pageable, Class<T> type);
 
     Page<ProjectMembersGetDTO> findAllByProjectId(UUID projectId, Pageable pageable);
+    Page<ProjectMembersGetDTO> findAllByUserId(UUID memberId, Pageable pageable);
 
     @Transactional
     @Modifying
-    @Query("UPDATE ProjectMembers pm SET pm.userProjectStatus = :userProjectStatus WHERE PM.id = :id")
+    @Query("UPDATE ProjectMembers pm SET pm.userProjectStatus = :userProjectStatus WHERE pm.id = :id")
     void changeUserProjectStatus(UserProjectStatus userProjectStatus, UUID id);
 }

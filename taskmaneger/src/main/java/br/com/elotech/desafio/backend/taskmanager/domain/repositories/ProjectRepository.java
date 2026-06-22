@@ -25,5 +25,5 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
     @EntityGraph(attributePaths = {"members", "creator"})
     Page<Project> findDistinctByMembersUserId(UUID userId, Pageable pageable);
 
-    boolean findByName(String name);
+    boolean existsByName(String name);
 }

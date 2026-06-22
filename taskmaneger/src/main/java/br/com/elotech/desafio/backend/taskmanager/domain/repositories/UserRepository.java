@@ -34,7 +34,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     void changeUserRoleTo(Role role, UUID id);
     @Transactional
     @Modifying
-    @Query("UPDATE User u SET u.commonData.entityStatus = :entityStatus WHERE u.id = :id")
+    @Query("UPDATE User u SET u.entityStatus = :entityStatus WHERE u.id = :id")
     void changeEntityStatusTo(EntityStatus entityStatus, UUID id);
 
     List<User> id(UUID id);

@@ -1,6 +1,7 @@
 package br.com.elotech.desafio.backend.taskmanager.domain.models;
 
 import br.com.elotech.desafio.backend.taskmanager.domain.Embedded.CommonData;
+import br.com.elotech.desafio.backend.taskmanager.domain.enums.EntityStatus;
 import br.com.elotech.desafio.backend.taskmanager.domain.enums.TaskPriority;
 import br.com.elotech.desafio.backend.taskmanager.domain.enums.TaskStatus;
 import jakarta.persistence.*;
@@ -52,6 +53,10 @@ public class Task {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "entity_status", nullable = false)
+    private EntityStatus entityStatus = EntityStatus.ACTIVE;
 
     @Embedded
     private CommonData commonData = new CommonData();

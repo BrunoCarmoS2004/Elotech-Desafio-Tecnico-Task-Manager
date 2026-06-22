@@ -4,12 +4,12 @@ import br.com.elotech.desafio.backend.taskmanager.domain.dtos.gets.UserGetDTO;
 import br.com.elotech.desafio.backend.taskmanager.domain.dtos.posts.UserPostDTO;
 import br.com.elotech.desafio.backend.taskmanager.domain.enums.EntityStatus;
 import br.com.elotech.desafio.backend.taskmanager.domain.enums.Role;
-import br.com.elotech.desafio.backend.taskmanager.domain.models.Project;
 import br.com.elotech.desafio.backend.taskmanager.domain.models.User;
 import br.com.elotech.desafio.backend.taskmanager.domain.repositories.UserRepository;
 import br.com.elotech.desafio.backend.taskmanager.exceptions.NotFoundException;
 import br.com.elotech.desafio.backend.taskmanager.exceptions.UnauthorizedException;
 import br.com.elotech.desafio.backend.taskmanager.mappers.UserMapper;
+import br.com.elotech.desafio.backend.taskmanager.security.dtos.gets.UserWithTokenGetDTO;
 import br.com.elotech.desafio.backend.taskmanager.security.dtos.gets.UserLoginValidationGetDTO;
 import br.com.elotech.desafio.backend.taskmanager.security.services.TokenService;
 import br.com.elotech.desafio.backend.taskmanager.utils.MessageUtils;
@@ -64,51 +64,33 @@ public class UserService {
         );
     }
 
-    @Cacheable(value = "usersPage")
     public PagedModel<UserGetDTO> getAll(Pageable pageable) {
         return new PagedModel<>(usuarioRepository.findBy(pageable, UserGetDTO.class));
     }
 
-    @Cacheable(value = "userById", key = "#id")
     public UserGetDTO getUserById(UUID id) {
         return usuarioRepository.findById(id, UserGetDTO.class).orElseThrow(
                 () -> new NotFoundException(messageUtils.getMessage("user.not-found"))
         );
     }
 
-    @CacheEvict(value = "usersPage", allEntries = true)
-    public UserGetDTO postUser(@Valid UserPostDTO userPostDTO) {
+    public UserWithTokenGetDTO postUser(@Valid UserPostDTO userPostDTO) {
         userValidation.userExistsByEmail(userPostDTO.email());
         User user = saveAndReturn(userPostDTO);
         generateTokenResponse(user);
-        return userMapper.userToUserGetDTO(user);
+        return userMapper.userToUserWithTokenGetDTO(user);
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "userById", key = "#id"),
-            @CacheEvict(value = "userRefresh", key = "#id"),
-            @CacheEvict(value = "usersPage", allEntries = true)
-    })
     public void changeUserName(UUID id, String name) {
         validateUserExists(id);
         usuarioRepository.changeUserNameTo(name, id);
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "userById", key = "#id"),
-            @CacheEvict(value = "userRefresh", key = "#id"),
-            @CacheEvict(value = "usersPage", allEntries = true)
-    })
     public void changeUserRole(UUID id, Role role) {
         validateUserExists(id);
         usuarioRepository.changeUserRoleTo(role, id);
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "userById", key = "#id"),
-            @CacheEvict(value = "userRefresh", key = "#id"),
-            @CacheEvict(value = "usersPage", allEntries = true)
-    })
     public void updateEntityStatus(EntityStatus entityStatus, UUID id) {
         validateUserExists(id);
         usuarioRepository.changeEntityStatusTo(entityStatus, id);

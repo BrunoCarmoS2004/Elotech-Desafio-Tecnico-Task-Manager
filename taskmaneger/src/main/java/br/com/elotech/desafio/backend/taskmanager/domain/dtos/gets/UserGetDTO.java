@@ -1,13 +1,10 @@
 package br.com.elotech.desafio.backend.taskmanager.domain.dtos.gets;
 
-import br.com.elotech.desafio.backend.taskmanager.domain.Embedded.CommonData;
+import br.com.elotech.desafio.backend.taskmanager.domain.enums.EntityStatus;
 import br.com.elotech.desafio.backend.taskmanager.domain.enums.Role;
-import br.com.elotech.desafio.backend.taskmanager.security.responses.TokenResponse;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.UUID;
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public record UserGetDTO(
         UUID id,
 
@@ -15,10 +12,8 @@ public record UserGetDTO(
 
         String email,
 
-        Role userRole,
+        Role role,
 
-        CommonData commonData,
-
-        TokenResponse tokenResponse
+        EntityStatus entityStatus
 ) {
 }

@@ -1,6 +1,7 @@
 package br.com.elotech.desafio.backend.taskmanager.domain.models;
 
 import br.com.elotech.desafio.backend.taskmanager.domain.Embedded.CommonData;
+import br.com.elotech.desafio.backend.taskmanager.domain.enums.EntityStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -45,6 +46,10 @@ public class TaskLog {
     @NotNull
     @Column(name = "altered_date", nullable = false)
     private LocalDateTime alteredDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "entity_status", nullable = false)
+    private EntityStatus entityStatus = EntityStatus.ACTIVE;
 
     @Embedded
     private CommonData commonData = new CommonData();

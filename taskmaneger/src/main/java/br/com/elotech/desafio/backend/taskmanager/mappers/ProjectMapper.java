@@ -8,14 +8,21 @@ import br.com.elotech.desafio.backend.taskmanager.domain.models.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Mappings;
 
 import java.util.UUID;
 
 @Mapper(componentModel = "spring", uses =  {ProjectMembersMapper.class})
 public interface ProjectMapper {
+    @Mapping(source = "creator.id", target = "creatorId")
     ProjectGetDTO projectToProjectGetDTO(Project project);
-    @Mapping(source = "creatorId", target = "creator")
+
+    @Mappings({
+            @Mapping(target = "members", ignore = true),
+            @Mapping(source = "creatorId", target = "creator")
+    })
     Project projectPostDTOToProject(ProjectPostDTO projectPostDTO);
+
     void projectPutDTOToProject(ProjectPutDTO projectPutDTO, @MappingTarget Project project);
 
     default User mapToUser(UUID creatorId) {
