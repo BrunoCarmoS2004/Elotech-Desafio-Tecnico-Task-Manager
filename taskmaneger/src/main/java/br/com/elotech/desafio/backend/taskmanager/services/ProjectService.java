@@ -75,6 +75,10 @@ public class ProjectService {
         return projectMapper.projectToProjectGetDTO(project);
     }
 
+    protected void validateProjectExists(UUID id) {
+        projectValidation.projectExistsById(id);
+    }
+
     private void projectValidations(ProjectPostDTO projectPostDTO) {
         userService.validateUserExists(projectPostDTO.creatorId());
         projectValidation.projectNameExists(projectPostDTO.name());

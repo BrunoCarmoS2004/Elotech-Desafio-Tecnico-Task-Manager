@@ -26,7 +26,7 @@ public class ProjectValidation {
 
     public void projectExistsById(UUID id) {
         if (!projectRepository.existsById(id)){
-            throw new ValidationException(messageUtils.getMessage("project-members.not-found"));
+            throw new ValidationException(messageUtils.getMessage("project.not-found"));
         }
     }
 }

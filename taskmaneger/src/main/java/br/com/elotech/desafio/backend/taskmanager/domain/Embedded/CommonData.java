@@ -1,10 +1,8 @@
 package br.com.elotech.desafio.backend.taskmanager.domain.Embedded;
 
-import br.com.elotech.desafio.backend.taskmanager.domain.enums.EntityStatus;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

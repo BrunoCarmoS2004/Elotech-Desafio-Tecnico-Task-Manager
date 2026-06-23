@@ -74,6 +74,10 @@ public class ProjectMembersService {
         projectMembersRepository.changeUserProjectStatus(userProjectStatus, id);
     }
 
+    protected void memberInProject(UUID projectId, UUID memberId) {
+        projectMembersValidation.memberInProject(projectId, memberId);
+    }
+
     private void createProjectMembers(ProjectMembersPostDTO projectMembersPostDTO, List<ProjectMembers> members) {
         Project referenceProject = projectRepository.getReferenceById(projectMembersPostDTO.projectId());
         projectMembersPostDTO.memberIds().forEach(member ->{
@@ -84,7 +88,9 @@ public class ProjectMembersService {
     }
 
     private void projectMembersValidations(ProjectMembersPostDTO projectMembersPostDTO) {
+        projectMembersValidation.memberAlreadyInProject(projectMembersPostDTO.projectId(), projectMembersPostDTO.memberIds());
         projectValidation.projectExistsById(projectMembersPostDTO.projectId());
         userService.validateUsersExists(projectMembersPostDTO.memberIds());
+
     }
 }

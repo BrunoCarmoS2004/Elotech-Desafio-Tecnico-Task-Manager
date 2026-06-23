@@ -32,7 +32,7 @@ public class FilterConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/user", "/project", "/members").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/user", "/project", "/members", "/tasks").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/user/change/*/role").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/project/creator/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.GET, "/project/member/**").hasAnyRole("ADMIN", "MEMBER", "MEMBER_MANAGER")

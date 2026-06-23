@@ -1,0 +1,1540 @@
+{
+  "info": {
+    "name": "Elotech Task Manager API",
+    "description": "Collection Postman com os endpoints do projeto e um fluxo E2E pronto para uso.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "projectId",
+      "value": ""
+    },
+    {
+      "key": "taskId",
+      "value": ""
+    },
+    {
+      "key": "projectMemberId",
+      "value": ""
+    },
+    {
+      "key": "userEmail",
+      "value": "admin.e2e@elotech.com.br"
+    },
+    {
+      "key": "userPassword",
+      "value": "Senha@123"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Fluxo E2E",
+      "item": [
+        {
+          "name": "01 - Criar Usuário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const requestBody = JSON.parse(pm.request.body.raw);",
+                  "  if (requestBody.email) pm.collectionVariables.set('userEmail', requestBody.email);",
+                  "  if (requestBody.password) pm.collectionVariables.set('userPassword', requestBody.password);",
+                  "} catch(e) {}",
+                  "const json = pm.response.json();",
+                  "if (json?.data?.id) pm.collectionVariables.set('userId', json.data.id);",
+                  "else if (json?.id) pm.collectionVariables.set('userId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Administrador E2E\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user"
+              ]
+            },
+            "description": "Requisição do fluxo ponta a ponta (E2E) para criar um usuário inicial com o perfil ADMIN. Este usuário será armazenado nas variáveis para ser usado nas próximas requisições do fluxo.\n\n**Permissões (Roles):** PermitAll (Acesso Público)"
+          }
+        },
+        {
+          "name": "02 - Realizar Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.token) pm.collectionVariables.set('token', json.token);",
+                  "if (json?.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Requisição E2E para realizar o login com o usuário recém-criado. O script de teste extrai automaticamente o Bearer token para as variáveis globais da collection, permitindo chamadas autenticadas.\n\n**Permissões (Roles):** PermitAll (Acesso Público)"
+          }
+        },
+        {
+          "name": "03 - Criar Projeto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.id) pm.collectionVariables.set('projectId', json.data.id);",
+                  "else if (json?.id) pm.collectionVariables.set('projectId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Projeto E2E\",\n  \"description\": \"Projeto criado durante o fluxo E2E\",\n  \"creatorId\": \"{{userId}}\",\n  \"members\": [\n    \"{{userId}}\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/project",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "project"
+              ]
+            },
+            "description": "Requisição E2E para criar um projeto e associar automaticamente ao usuário que criamos no primeiro passo.\n\n**Permissões (Roles):** ADMIN, MANAGER"
+          }
+        },
+        {
+          "name": "04 - Criar Tarefa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.id) pm.collectionVariables.set('taskId', json.data.id);",
+                  "else if (json?.id) pm.collectionVariables.set('taskId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tarefa E2E\",\n  \"description\": \"Tarefa criada durante o fluxo E2E\",\n  \"status\": \"DONE\",\n  \"priority\": \"HIGH\",\n  \"deadline\": \"2026-12-31T23:59:59\",\n  \"responsibleId\": \"{{userId}}\",\n  \"projectId\": \"{{projectId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/task",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "task"
+              ]
+            },
+            "description": "Requisição E2E para criar uma tarefa vinculada ao projeto e delegada ao usuário principal.\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Auth",
+      "item": [
+        {
+          "name": "POST /auth/login (MANAGER)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.token) pm.collectionVariables.set('token', json.token);",
+                  "if (json?.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"manager@elotech.com.br\",\n  \"password\": \"Senha@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Endpoint de autenticação. Recebe as credenciais do usuário (e-mail e senha) e retorna o token JWT (`token`) e o token de renovação (`refreshToken`). O JWT deve ser utilizado no cabeçalho Authorization como `Bearer {token}`.\n\n**Permissões (Roles):** PermitAll (Acesso Público)"
+          }
+        },
+        {
+          "name": "POST /auth/login (ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.token) pm.collectionVariables.set('token', json.token);",
+                  "if (json?.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@elotech.com.br\",\n  \"password\": \"Senha@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Endpoint de autenticação. Recebe as credenciais do usuário (e-mail e senha) e retorna o token JWT (`token`) e o token de renovação (`refreshToken`). O JWT deve ser utilizado no cabeçalho Authorization como `Bearer {token}`.\n\n**Permissões (Roles):** PermitAll (Acesso Público)"
+          }
+        },
+        {
+          "name": "POST /auth/login (MEMBER)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.token) pm.collectionVariables.set('token', json.token);",
+                  "if (json?.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"member@elotech.com.br\",\n  \"password\": \"Senha@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Endpoint de autenticação. Recebe as credenciais do usuário (e-mail e senha) e retorna o token JWT (`token`) e o token de renovação (`refreshToken`). O JWT deve ser utilizado no cabeçalho Authorization como `Bearer {token}`.\n\n**Permissões (Roles):** PermitAll (Acesso Público)"
+          }
+        },
+        {
+          "name": "POST /auth/login (MEMBER_MANAGER)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.token) pm.collectionVariables.set('token', json.token);",
+                  "if (json?.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"member_manager@elotech.com.br\",\n  \"password\": \"Senha@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Endpoint de autenticação. Recebe as credenciais do usuário (e-mail e senha) e retorna o token JWT (`token`) e o token de renovação (`refreshToken`). O JWT deve ser utilizado no cabeçalho Authorization como `Bearer {token}`.\n\n**Permissões (Roles):** PermitAll (Acesso Público)"
+          }
+        },
+        {
+          "name": "POST /auth/refresh",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.token) pm.collectionVariables.set('token', json.token);",
+                  "if (json?.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Gera um novo token JWT de acesso utilizando um `refreshToken` válido. Utilizado para renovar a sessão do usuário sem exigir novo login com credenciais.\n\n**Permissões (Roles):** PermitAll (Acesso Público)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - User",
+      "item": [
+        {
+          "name": "GET /user",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user?page=0&size=10&sort=name,desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "name,desc"
+                }
+              ]
+            },
+            "description": "Retorna uma lista paginada com todos os usuários cadastrados. Suporta ordenação e configuração de tamanho de página via Query Params.\n\n**Permissões (Roles):** ADMIN"
+          }
+        },
+        {
+          "name": "GET /user/{id}",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "{{userId}}"
+              ]
+            },
+            "description": "Busca e retorna os detalhes completos de um usuário específico através do seu ID (UUID).\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "POST /user (MANAGER)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const requestBody = JSON.parse(pm.request.body.raw);",
+                  "  if (requestBody.email) pm.collectionVariables.set('userEmail', requestBody.email);",
+                  "  if (requestBody.password) pm.collectionVariables.set('userPassword', requestBody.password);",
+                  "} catch(e) {}",
+                  "const json = pm.response.json();",
+                  "if (json?.data?.id) pm.collectionVariables.set('userId', json.data.id);",
+                  "else if (json?.id) pm.collectionVariables.set('userId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Novo MANAGER\",\n  \"email\": \"manager@elotech.com.br\",\n  \"password\": \"Senha@123\",\n  \"role\": \"MANAGER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user"
+              ]
+            },
+            "description": "Cria um novo usuário na plataforma. O corpo da requisição (`body`) exige atributos fundamentais como nome, e-mail válido, senha forte e a definição do Role (perfil de acesso: MANAGER, ADMIN, MEMBER, etc).\n\n**Permissões (Roles):** PermitAll (Acesso Público)"
+          }
+        },
+        {
+          "name": "POST /user (ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const requestBody = JSON.parse(pm.request.body.raw);",
+                  "  if (requestBody.email) pm.collectionVariables.set('userEmail', requestBody.email);",
+                  "  if (requestBody.password) pm.collectionVariables.set('userPassword', requestBody.password);",
+                  "} catch(e) {}",
+                  "const json = pm.response.json();",
+                  "if (json?.data?.id) pm.collectionVariables.set('userId', json.data.id);",
+                  "else if (json?.id) pm.collectionVariables.set('userId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Novo ADMIN\",\n  \"email\": \"admin@elotech.com.br\",\n  \"password\": \"Senha@123\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user"
+              ]
+            },
+            "description": "Cria um novo usuário na plataforma. O corpo da requisição (`body`) exige atributos fundamentais como nome, e-mail válido, senha forte e a definição do Role (perfil de acesso: MANAGER, ADMIN, MEMBER, etc).\n\n**Permissões (Roles):** PermitAll (Acesso Público)"
+          }
+        },
+        {
+          "name": "POST /user (MEMBER)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const requestBody = JSON.parse(pm.request.body.raw);",
+                  "  if (requestBody.email) pm.collectionVariables.set('userEmail', requestBody.email);",
+                  "  if (requestBody.password) pm.collectionVariables.set('userPassword', requestBody.password);",
+                  "} catch(e) {}",
+                  "const json = pm.response.json();",
+                  "if (json?.data?.id) pm.collectionVariables.set('userId', json.data.id);",
+                  "else if (json?.id) pm.collectionVariables.set('userId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Novo MEMBER\",\n  \"email\": \"member@elotech.com.br\",\n  \"password\": \"Senha@123\",\n  \"role\": \"MEMBER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user"
+              ]
+            },
+            "description": "Cria um novo usuário na plataforma. O corpo da requisição (`body`) exige atributos fundamentais como nome, e-mail válido, senha forte e a definição do Role (perfil de acesso: MANAGER, ADMIN, MEMBER, etc).\n\n**Permissões (Roles):** PermitAll (Acesso Público)"
+          }
+        },
+        {
+          "name": "POST /user (MEMBER_MANAGER)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const requestBody = JSON.parse(pm.request.body.raw);",
+                  "  if (requestBody.email) pm.collectionVariables.set('userEmail', requestBody.email);",
+                  "  if (requestBody.password) pm.collectionVariables.set('userPassword', requestBody.password);",
+                  "} catch(e) {}",
+                  "const json = pm.response.json();",
+                  "if (json?.data?.id) pm.collectionVariables.set('userId', json.data.id);",
+                  "else if (json?.id) pm.collectionVariables.set('userId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Novo MEMBER_MANAGER\",\n  \"email\": \"member_manager@elotech.com.br\",\n  \"password\": \"Senha@123\",\n  \"role\": \"MEMBER_MANAGER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user"
+              ]
+            },
+            "description": "Cria um novo usuário na plataforma. O corpo da requisição (`body`) exige atributos fundamentais como nome, e-mail válido, senha forte e a definição do Role (perfil de acesso: MANAGER, ADMIN, MEMBER, etc).\n\n**Permissões (Roles):** PermitAll (Acesso Público)"
+          }
+        },
+        {
+          "name": "PATCH /user/change/{id}/name",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/change/{{userId}}/name?name=Nome Atualizado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "change",
+                "{{userId}}",
+                "name"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Nome Atualizado"
+                }
+              ]
+            },
+            "description": "Endpoint para alterar exclusivamente o nome do usuário informado pelo ID.\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "PATCH /user/change/{id}/role",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/change/{{userId}}/role?role=ADMIN",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "change",
+                "{{userId}}",
+                "role"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "ADMIN"
+                }
+              ]
+            },
+            "description": "Endpoint para alterar o nível de acesso (Role) de um usuário.\n\n**Permissões (Roles):** ADMIN"
+          }
+        },
+        {
+          "name": "PATCH /user/change/{id}/entitystatus",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/change/{{userId}}/entitystatus?entityStatus=ACTIVE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "change",
+                "{{userId}}",
+                "entitystatus"
+              ],
+              "query": [
+                {
+                  "key": "entityStatus",
+                  "value": "ACTIVE"
+                }
+              ]
+            },
+            "description": "Endpoint para alterar o status da entidade do usuário (ex: ACTIVE, INACTIVE), útil para soft delete.\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Project",
+      "item": [
+        {
+          "name": "GET /project",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/project?page=0&size=10&sort=name,desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "project"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "name,desc"
+                }
+              ]
+            },
+            "description": "Lista todos os projetos do sistema de forma paginada.\n\n**Permissões (Roles):** ADMIN"
+          }
+        },
+        {
+          "name": "GET /project/creator/{creatorId}",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/project/creator/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "project",
+                "creator",
+                "{{userId}}"
+              ]
+            },
+            "description": "Lista todos os projetos que foram criados por um usuário específico (creatorId).\n\n**Permissões (Roles):** ADMIN, MANAGER"
+          }
+        },
+        {
+          "name": "GET /project/member/{memberId}",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/project/member/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "project",
+                "member",
+                "{{userId}}"
+              ]
+            },
+            "description": "Lista os projetos nos quais um determinado usuário foi adicionado como membro ativo.\n\n**Permissões (Roles):** ADMIN, MEMBER, MEMBER_MANAGER"
+          }
+        },
+        {
+          "name": "GET /project/{id}",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/project/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "project",
+                "{{projectId}}"
+              ]
+            },
+            "description": "Busca os dados de um projeto específico a partir de seu ID (UUID).\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "POST /project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.id) pm.collectionVariables.set('projectId', json.data.id);",
+                  "else if (json?.id) pm.collectionVariables.set('projectId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Novo Projeto\",\n  \"description\": \"Descrição do novo projeto\",\n  \"creatorId\": \"{{userId}}\",\n  \"members\": [\n    \"{{userId}}\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/project",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "project"
+              ]
+            },
+            "description": "Cria um novo projeto. É necessário informar o `creatorId` (Dono do projeto) e uma lista inicial de `members` (Membros participantes).\n\n**Permissões (Roles):** ADMIN, MANAGER"
+          }
+        },
+        {
+          "name": "PUT /project/{id}",
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Projeto Atualizado\",\n  \"description\": \"Descrição atualizada do projeto\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/project/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "project",
+                "{{projectId}}"
+              ]
+            },
+            "description": "Atualiza os dados gerais (nome, descrição) de um projeto já existente.\n\n**Permissões (Roles):** ADMIN, MANAGER"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Project Members",
+      "item": [
+        {
+          "name": "GET /members",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Lista geral das vinculações entre usuários e projetos (Project Members).\n\n**Permissões (Roles):** ADMIN"
+          }
+        },
+        {
+          "name": "GET /members/{id}",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/{{projectMemberId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "{{projectMemberId}}"
+              ]
+            },
+            "description": "**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "GET /members/project/{projectId}",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/project/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "project",
+                "{{projectId}}"
+              ]
+            },
+            "description": "Busca de forma paginada todos os membros associados a um projeto específico.\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "GET /members/member/{memberId}",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/member/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "member",
+                "{{userId}}"
+              ]
+            },
+            "description": "Busca todas as afiliações e participações ativas de um membro específico.\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "POST /members/add",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{projectId}}\",\n  \"memberIds\": [\n    \"{{userId}}\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/add",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "add"
+              ]
+            },
+            "description": "Endpoint para incluir novos membros a um projeto existente. Recebe o ID do projeto e uma lista de UUIDs dos usuários a serem incluídos.\n\n**Permissões (Roles):** ADMIN, MANAGER, MEMBER_MANAGER"
+          }
+        },
+        {
+          "name": "PATCH /members/change/{id}/status",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/change/{{projectMemberId}}/status?status=ACTIVE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "change",
+                "{{projectMemberId}}",
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                }
+              ]
+            },
+            "description": "Endpoint para alterar o status de um membro dentro de um projeto (ex: inativar sua participação).\n\n**Permissões (Roles):** ADMIN, MANAGER, MEMBER_MANAGER"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Task",
+      "item": [
+        {
+          "name": "GET /task",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/task?page=0&size=10&sort=commonData.createdAt,desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "task"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc"
+                }
+              ]
+            },
+            "description": "Lista todas as tarefas criadas na plataforma, independente do projeto, de forma paginada.\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "GET /task/{id}",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/task/{{taskId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "task",
+                "{{taskId}}"
+              ]
+            },
+            "description": "Busca todos os detalhes de uma tarefa pelo seu ID (UUID).\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "POST /task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.id) pm.collectionVariables.set('taskId', json.data.id);",
+                  "else if (json?.id) pm.collectionVariables.set('taskId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Nova Tarefa\",\n  \"description\": \"Descrição da tarefa\",\n  \"status\": \"TODO\",\n  \"priority\": \"HIGH\",\n  \"deadline\": \"2026-12-31T23:59:59\",\n  \"responsibleId\": \"{{userId}}\",\n  \"projectId\": \"{{projectId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/task",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "task"
+              ]
+            },
+            "description": "Cria uma nova tarefa associada a um projeto e a um responsável. Deve-se informar Título, Status, Prioridade e o Deadline (Prazo de finalização).\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "POST /task/filters",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"TODO\",\n  \"priority\": \"HIGH\",\n  \"responsibleId\": \"{{userId}}\",\n  \"startDate\": \"2025-01-01T00:00:00\",\n  \"endDate\": \"2026-12-31T23:59:59\",\n  \"searchText\": \"Tarefa\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/task/filters?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "task",
+                "filters"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Endpoint avançado de listagem de tarefas. Permite passar um payload contendo filtros customizados como status, prioridade, data inicial e final, texto contido, e responsável.\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "PUT /task/{id}",
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tarefa Atualizada\",\n  \"description\": \"Descrição atualizada\",\n  \"status\": \"IN_PROGRESS\",\n  \"priority\": \"MEDIUM\",\n  \"deadline\": \"2026-12-31T23:59:59\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/task/{{taskId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "task",
+                "{{taskId}}"
+              ]
+            },
+            "description": "Atualiza as principais informações de uma tarefa. Não altera responsáveis por aqui.\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "PATCH /task/change/{id}/status",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/task/change/{{taskId}}/status?status=DONE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "task",
+                "change",
+                "{{taskId}}",
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "DONE"
+                }
+              ]
+            },
+            "description": "Transição de estado da tarefa. Altera o status (ex: de TODO para IN_PROGRESS ou DONE).\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "PATCH /task/change/{id}/priority",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/task/change/{{taskId}}/priority?priority=LOW",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "task",
+                "change",
+                "{{taskId}}",
+                "priority"
+              ],
+              "query": [
+                {
+                  "key": "priority",
+                  "value": "LOW"
+                }
+              ]
+            },
+            "description": "Modifica o nível de prioridade da tarefa associada.\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
+          "name": "PATCH /task/change/{id}/responsible/{responsibleId}",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/task/change/{{taskId}}/responsible/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "task",
+                "change",
+                "{{taskId}}",
+                "responsible",
+                "{{userId}}"
+              ]
+            },
+            "description": "Realiza a transferência de titularidade de uma tarefa, definindo um novo usuário responsável.\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Project Report",
+      "item": [
+        {
+          "name": "GET /projects/{projectId}/report",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/projects/{{projectId}}/report",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "projects",
+                "{{projectId}}",
+                "report"
+              ]
+            },
+            "description": "Endpoint analítico. Gera e retorna um relatório completo do projeto especificado, consolidando métricas (ex: quantidade de tarefas em andamento, concluídas, total de membros, etc).\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE TABLE users (
    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -46,6 +47,7 @@ CREATE TABLE tasks (
    CONSTRAINT fk_tasks_responsible FOREIGN KEY (responsible_id) REFERENCES users(id) ON DELETE SET NULL,
    CONSTRAINT fk_tasks_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
+CREATE INDEX idx_tasks_text_search ON tasks USING GIN ((lower(title) || ' ' || lower(description)) gin_trgm_ops);
 
 CREATE TABLE tasks_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

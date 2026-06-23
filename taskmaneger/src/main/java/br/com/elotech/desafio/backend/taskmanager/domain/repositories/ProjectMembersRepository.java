@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,4 +28,8 @@ public interface ProjectMembersRepository extends JpaRepository<ProjectMembers, 
     @Modifying
     @Query("UPDATE ProjectMembers pm SET pm.userProjectStatus = :userProjectStatus WHERE pm.id = :id")
     void changeUserProjectStatus(UserProjectStatus userProjectStatus, UUID id);
+
+    boolean existsByProjectIdAndUserIdIn(UUID projectId, List<UUID> memberId);
+
+    boolean existsByProjectIdAndUserId(UUID projectId, UUID memberId);
 }
