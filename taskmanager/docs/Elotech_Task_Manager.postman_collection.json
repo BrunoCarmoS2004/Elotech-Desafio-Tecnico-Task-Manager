@@ -1262,7 +1262,7 @@
                 },
                 {
                   "key": "sort",
-                  "value": "createdAt,desc"
+                  "value": "commonData.createdAt,desc"
                 }
               ]
             },

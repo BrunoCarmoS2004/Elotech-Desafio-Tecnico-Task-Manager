@@ -10,6 +10,9 @@ import br.com.elotech.desafio.backend.taskmanager.exceptions.NotFoundException;
 import br.com.elotech.desafio.backend.taskmanager.mappers.ProjectMapper;
 import br.com.elotech.desafio.backend.taskmanager.utils.MessageUtils;
 import br.com.elotech.desafio.backend.taskmanager.validation.ProjectValidation;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -36,20 +39,25 @@ public class ProjectService {
         this.messageUtils = messageUtils;
     }
 
+    @Cacheable(value = "projectsListCache", key = "'all-' + #pageable.pageNumber + '-' + #pageable.pageSize")
     public PagedModel<ProjectGetDTO> getAll(Pageable pageable) {
         Page<Project> projects = projectRepository.findAllProjects(pageable);
         return new PagedModel<>(projects.map(projectMapper::projectToProjectGetDTO));
     }
 
+    @Cacheable(value = "projectsListCache", key = "'creator-' + #creatorId + '-' + #pageable.pageNumber")
     public PagedModel<ProjectGetDTO> getAllByCreator(UUID creatorId, Pageable pageable) {
         Page<Project> projects = projectRepository.findByCreatorId(creatorId, pageable);
         return new PagedModel<>(projects.map(projectMapper::projectToProjectGetDTO));
     }
+
+    @Cacheable(value = "projectsListCache", key = "'member-' + #memberId + '-' + #pageable.pageNumber")
     public PagedModel<ProjectGetDTO> getAllByMember(UUID memberId, Pageable pageable) {
         Page<Project> projects = projectRepository.findDistinctByMembersUserId(memberId, pageable);
         return new PagedModel<>(projects.map(projectMapper::projectToProjectGetDTO));
     }
 
+    @Cacheable(value = "projectCache", key = "#id")
     public ProjectGetDTO getProjectById(UUID id) {
         Project project = projectRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(messageUtils.getMessage("project.not-found"))
@@ -57,6 +65,7 @@ public class ProjectService {
         return projectMapper.projectToProjectGetDTO(project);
     }
 
+    @CacheEvict(value = "projectsListCache", allEntries = true)
     public ProjectGetDTO postProject(ProjectPostDTO projectPostDTO) {
         projectValidations(projectPostDTO);
         Project project = projectMapper.projectPostDTOToProject(projectPostDTO);
@@ -65,6 +74,10 @@ public class ProjectService {
         return projectMapper.projectToProjectGetDTO(project);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "projectCache", key = "#id"),
+            @CacheEvict(value = "projectsListCache", allEntries = true)
+    })
     public ProjectGetDTO putProject(UUID id, ProjectPutDTO projectPutDTO) {
         projectValidation.projectNameExists(projectPutDTO.name());
         Project project = projectRepository.findById(id).orElseThrow(

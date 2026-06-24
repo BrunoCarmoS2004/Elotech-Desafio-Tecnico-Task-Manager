@@ -17,6 +17,9 @@ import br.com.elotech.desafio.backend.taskmanager.exceptions.ValidationException
 import br.com.elotech.desafio.backend.taskmanager.mappers.TaskMapper;
 import br.com.elotech.desafio.backend.taskmanager.utils.MessageUtils;
 import br.com.elotech.desafio.backend.taskmanager.validation.TaskValidation;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -51,16 +54,19 @@ public class TaskService {
         this.taskLogService = taskLogService;
     }
 
+    @Cacheable(value = "tasksListCache", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public PagedModel<TaskGetDTO> getAll(Pageable pageable) {
         return new PagedModel<>(taskRepository.findAllTasks(pageable));
     }
 
+    @Cacheable(value = "taskCache", key = "#id")
     public TaskGetDTO getTaskById(UUID id) {
         return taskRepository.findTaskById(id).orElseThrow(
                 () -> new NotFoundException(messageUtils.getMessage("task.not-found"))
         );
     }
 
+    @Cacheable(value = "tasksListCache", key = "#taskFilterPostDTO.hashCode() + '-' + #pageable.pageNumber")
     public PagedModel<TaskGetDTO> getTasksWithFilters(TaskFilterPostDTO taskFilterPostDTO, Pageable pageable) {
         Specification<Task> spec = TaskSpecification.filterTasks(taskFilterPostDTO);
 
@@ -69,6 +75,7 @@ public class TaskService {
         return new PagedModel<>(tasks.map(taskMapper::taskToTaskGetDTO));
     }
 
+    @CacheEvict(value = "tasksListCache", allEntries = true)
     public TaskGetDTO postTask(TaskPostDTO taskPostDTO) {
         taskValidations(taskPostDTO.responsibleId(), taskPostDTO.projectId());
         Task task = taskMapper.taskPostDTOToTask(taskPostDTO);
@@ -76,6 +83,10 @@ public class TaskService {
         return taskMapper.taskToTaskGetDTO(task);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "taskCache", key = "#id"),
+            @CacheEvict(value = "tasksListCache", allEntries = true)
+    })
     public TaskGetDTO putTask(UUID id, TaskPutDTO taskPutDTO) {
         Task task = taskRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(messageUtils.getMessage("task.not-found"))
@@ -85,6 +96,10 @@ public class TaskService {
         return taskMapper.taskToTaskGetDTO(task);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "taskCache", key = "#id"),
+            @CacheEvict(value = "tasksListCache", allEntries = true)
+    })
     public void changeTaskStatus(UUID taskId, TaskStatus taskStatus) {
         TaskGetDTO task = getTaskById(taskId);
         validateStatusChange(task, taskStatus);
@@ -92,6 +107,10 @@ public class TaskService {
         saveTaskLog(task.id(), "TaskStatus", task.status().name(), taskStatus.name());
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "taskCache", key = "#id"),
+            @CacheEvict(value = "tasksListCache", allEntries = true)
+    })
     public void changeTaskPriority(UUID id, TaskPriority newTaskPriority) {
         taskExistsById(id);
         TaskPriority oldPriority = taskRepository.findTaskPriorityById(id);
@@ -99,6 +118,10 @@ public class TaskService {
         saveTaskLog(id, "TaskPriority", oldPriority.name(), newTaskPriority.name());
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "taskCache", key = "#id"),
+            @CacheEvict(value = "tasksListCache", allEntries = true)
+    })
     public void changeTaskResponsible(UUID id, UUID newResponsibleId) {
         taskExistsById(id);
         validateUserExists(newResponsibleId);

@@ -64,22 +64,26 @@ public class UserService {
         );
     }
 
+    @Cacheable(value = "userListCache", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public PagedModel<UserGetDTO> getAll(Pageable pageable) {
         return new PagedModel<>(usuarioRepository.findBy(pageable, UserGetDTO.class));
     }
 
+    @Cacheable(value = "userCache", key = "#id")
     public UserGetDTO getUserById(UUID id) {
         return usuarioRepository.findById(id, UserGetDTO.class).orElseThrow(
                 () -> new NotFoundException(messageUtils.getMessage("user.not-found"))
         );
     }
 
+    @Cacheable(value = "userCache", key = "#email")
     public UserGetDTO getUserByEmail(String email) {
         return usuarioRepository.findByEmail(email, UserGetDTO.class).orElseThrow(
                 () -> new NotFoundException(messageUtils.getMessage("user.not-found"))
         );
     }
-
+    
+    @CacheEvict(value = "userListCache", allEntries = true)
     public UserWithTokenGetDTO postUser(@Valid UserPostDTO userPostDTO) {
         userValidation.userExistsByEmail(userPostDTO.email());
         User user = saveAndReturn(userPostDTO);
@@ -87,16 +91,28 @@ public class UserService {
         return userMapper.userToUserWithTokenGetDTO(user);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "userCache", key = "#id"),
+            @CacheEvict(value = "userListCache", allEntries = true)
+    })
     public void changeUserName(UUID id, String name) {
         validateUserExists(id);
         usuarioRepository.changeUserNameTo(name, id);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "userCache", key = "#id"),
+            @CacheEvict(value = "userListCache", allEntries = true)
+    })
     public void changeUserRole(UUID id, Role role) {
         validateUserExists(id);
         usuarioRepository.changeUserRoleTo(role, id);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "userCache", key = "#id"),
+            @CacheEvict(value = "userListCache", allEntries = true)
+    })
     public void updateEntityStatus(EntityStatus entityStatus, UUID id) {
         validateUserExists(id);
         usuarioRepository.changeEntityStatusTo(entityStatus, id);

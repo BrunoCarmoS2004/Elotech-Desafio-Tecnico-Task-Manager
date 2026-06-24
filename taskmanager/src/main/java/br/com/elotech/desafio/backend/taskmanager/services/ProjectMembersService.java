@@ -14,6 +14,9 @@ import br.com.elotech.desafio.backend.taskmanager.mappers.ProjectMembersMapper;
 import br.com.elotech.desafio.backend.taskmanager.utils.MessageUtils;
 import br.com.elotech.desafio.backend.taskmanager.validation.ProjectMembersValidation;
 import br.com.elotech.desafio.backend.taskmanager.validation.ProjectValidation;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -43,24 +46,29 @@ public class ProjectMembersService {
         this.messageUtils = messageUtils;
     }
 
+    @Cacheable(value = "projectMembersListCache", key = "'all-' + #pageable.pageNumber + '-' + #pageable.pageSize")
     public PagedModel<ProjectMembersGetDTO> getAll(Pageable pageable) {
         return new PagedModel<>(projectMembersRepository.findBy(pageable, ProjectMembersGetDTO.class));
     }
 
+    @Cacheable(value = "projectMembersListCache", key = "'project-' + #projectId + '-' + #pageable.pageNumber")
     public PagedModel<ProjectMembersGetDTO> getAllProjectMembersByProjectId(UUID projectId, Pageable pageable) {
         return new PagedModel<>(projectMembersRepository.findAllByProjectId(projectId, pageable));
     }
 
+    @Cacheable(value = "projectMembersListCache", key = "'member-' + #memberId + '-' + #pageable.pageNumber")
     public PagedModel<ProjectMembersGetDTO> getAllProjectMembersByMemberId(UUID memberId, Pageable pageable) {
         return new PagedModel<>(projectMembersRepository.findAllByUserId(memberId, pageable));
     }
 
+    @Cacheable(value = "projectMemberCache", key = "#id")
     public ProjectMembersGetDTO getProjectMembersById(UUID id) {
         return projectMembersRepository.findById(id, ProjectMembersGetDTO.class).orElseThrow(
                 () -> new NotFoundException(messageUtils.getMessage("project-members.not-found"))
         );
     }
 
+    @CacheEvict(value = "projectMembersListCache", allEntries = true)
     public MembersAddedGetDTO addMembersProject(ProjectMembersPostDTO projectMembersPostDTO) {
         projectMembersValidations(projectMembersPostDTO);
         List<ProjectMembers> members = new ArrayList<>();
@@ -69,6 +77,10 @@ public class ProjectMembersService {
         return new MembersAddedGetDTO(projectMembersPostDTO.projectId(), members.stream().map(projectMembersMapper::projectMembersToProjectMembersGetDTO).toList());
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "projectMemberCache", key = "#id"),
+            @CacheEvict(value = "projectMembersListCache", allEntries = true)
+    })
     public void changeUserProjectStatus(UUID id, UserProjectStatus userProjectStatus) {
         projectMembersValidation.projectMembersExistsById(id);
         projectMembersRepository.changeUserProjectStatus(userProjectStatus, id);
