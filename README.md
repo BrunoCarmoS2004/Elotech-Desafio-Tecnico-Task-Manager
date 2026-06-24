@@ -37,7 +37,7 @@ git clone https://github.com/BrunoCarmoS2004/Elotech-Desafio-Tecnico-Task-Manage
 ``
 #### 3. Existe 3 jeitos de rodar o projeto
 ###### Tendo Docker instalado
-###### 1. Rodar na primeira vez:
+###### 1. Rodar na primeira vez, via CMD na pasta:
 ```bash 
 docker compose -f infra/docker-compose.yml up -d --build
 ```
@@ -45,7 +45,7 @@ docker compose -f infra/docker-compose.yml up -d --build
 ###### Tendo Docker instalado
 ###### 2. Abrir o \taskmanager na sua máquina numa IDE que suporte java
 ###### 2.1. Abrir o \taskmanager-frontend na sua máquina numa IDE que suporte TypeScript
-###### 2.2 Rodar: 
+###### 2.2 Rodar, via CMD na pasta: 
 ```bash 
 docker run --name postgres-taskmanager -e POSTGRES_USER=elotech -e POSTGRES_PASSWORD=elotech -e POSTGRES_DB=elotech -p 5432:5432 -d postgres:15-alpine
 ```
