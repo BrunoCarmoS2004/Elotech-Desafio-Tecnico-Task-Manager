@@ -100,10 +100,10 @@ public class TaskService {
             @CacheEvict(value = "taskCache", key = "#id"),
             @CacheEvict(value = "tasksListCache", allEntries = true)
     })
-    public void changeTaskStatus(UUID taskId, TaskStatus taskStatus) {
-        TaskGetDTO task = getTaskById(taskId);
+    public void changeTaskStatus(UUID id, TaskStatus taskStatus) {
+        TaskGetDTO task = getTaskById(id);
         validateStatusChange(task, taskStatus);
-        taskRepository.changeTaskStatusTo(taskStatus, taskId);
+        taskRepository.changeTaskStatusTo(taskStatus, id);
         saveTaskLog(task.id(), "TaskStatus", task.status().name(), taskStatus.name());
     }
 
