@@ -208,7 +208,9 @@ export class DashboardComponent implements OnInit {
       });
   }
 
-  onProjectChange(projectId: string): void {
+  onProjectChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const projectId = target.value;
     const selectedProj = this.projectService
       .userProjects()
       .find((p) => p.id === projectId);

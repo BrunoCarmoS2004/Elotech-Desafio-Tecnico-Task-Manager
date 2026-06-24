@@ -26,6 +26,10 @@ public class TaskSpecification {
                 predicates.add(cb.equal(root.get("responsible").get("id"), filter.responsibleId()));
             }
 
+            if (filter.responsibleId() != null) {
+                predicates.add(cb.equal(root.get("project").get("id"), filter.projectId()));
+            }
+
             if (filter.startDate() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("commonData").get("createdAt"), filter.startDate()));
             }

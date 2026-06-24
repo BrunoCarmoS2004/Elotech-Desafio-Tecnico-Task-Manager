@@ -10,6 +10,7 @@ public record TaskFilterPostDTO(
         TaskStatus status,
         TaskPriority priority,
         UUID responsibleId,
+        UUID projectId,
         LocalDateTime startDate,
         LocalDateTime endDate,
         String searchText

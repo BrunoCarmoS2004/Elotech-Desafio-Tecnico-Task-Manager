@@ -2,24 +2,10 @@
   <header class="dashboard-header">
     <div>
       <h1>Painel de Controle</h1>
-      @if (projectService.userProjects().length > 0) {
-        <div class="project-selector">
-          <label for="activeProject">Projeto Ativo: </label>
-          <select
-            id="activeProject"
-            [value]="projectService.currentProject()?.id"
-            (change)="onProjectChange($any($event.target).value)"
-          >
-            @for (proj of projectService.userProjects(); track proj.id) {
-              <option [value]="proj.id">{{ proj.name }}</option>
-            }
-          </select>
-        </div>
-      }
     </div>
 
     <div class="actions-area">
-      @if (canCreateProject()) {
+      @if (canCreateProject() && !projectService.currentProject()) {
         <button class="btn btn-primary" (click)="toggleCreateForm()">
           {{ showCreateForm() ? "Cancelar" : "+ Novo Projeto" }}
         </button>

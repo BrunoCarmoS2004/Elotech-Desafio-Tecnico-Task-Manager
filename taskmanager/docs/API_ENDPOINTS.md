@@ -257,9 +257,9 @@ Cria um projeto.
 {
   "name": "Nome do Projeto",
   "description": "Descrição detalhada do projeto",
-  "creatorId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "creatorId": "uuid",
   "members": [
-    "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    "uuid"
   ]
 }
 ```
@@ -273,7 +273,7 @@ Cria um projeto.
     "id": "uuid",
     "name": "Nome do Projeto",
     "description": "Descrição detalhada do projeto",
-    "creatorId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "creatorId": "uuid",
     "members": [
       {
         "id": "uuid",
@@ -465,9 +465,9 @@ Adiciona membros a um projeto.
 ### Body
 ```json
 {
-  "projectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "projectId": "uuid",
   "memberIds": [
-    "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    "uuid"
   ]
 }
 ```
@@ -478,7 +478,7 @@ Adiciona membros a um projeto.
   "id": "uuid",
   "message": "Membros adicionados ao projeto com sucesso",
   "data": {
-    "projectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "projectId": "uuid",
     "membersAdded": [
       {
         "id": "uuid",
@@ -622,8 +622,8 @@ Autenticado
   "status": "PENDING",
   "priority": "HIGH",
   "deadline": "2026-12-31T23:59:59",
-  "responsibleId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "projectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  "responsibleId": "uuid",
+  "projectId": "uuid"
 }
 ```
 
@@ -639,8 +639,8 @@ Autenticado
     "status": "PENDING",
     "priority": "HIGH",
     "deadline": "2026-12-31T23:59:59",
-    "responsibleId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "projectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "responsibleId": "uuid",
+    "projectId": "uuid",
     "entityStatus": "ACTIVE",
     "createdAt": "2026-06-23T15:00:00",
     "updatedAt": "2026-06-23T15:00:00"
@@ -719,7 +719,8 @@ Autenticado
 {
   "status": "PENDING",
   "priority": "HIGH",
-  "responsibleId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "responsibleId": "uuid",
+  "projectId": "uuid",
   "startDate": "2026-01-01T00:00:00",
   "endDate": "2026-12-31T23:59:59",
   "searchText": "termo de busca"

@@ -1367,7 +1367,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"TODO\",\n  \"priority\": \"HIGH\",\n  \"responsibleId\": \"{{userId}}\",\n  \"startDate\": \"2025-01-01T00:00:00\",\n  \"endDate\": \"2026-12-31T23:59:59\",\n  \"searchText\": \"Tarefa\"\n}"
+              "raw": "{\n  \"status\": \"TODO\",\n  \"priority\": \"HIGH\",\n  \"responsibleId\": \"{{userId}}\",\n  \"projectId\": \"{{projectId}}\",\n  \"startDate\": \"2025-01-01T00:00:00\",\n  \"endDate\": \"2026-12-31T23:59:59\",\n  \"searchText\": \"Tarefa\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/task/filters?page=0&size=10",
