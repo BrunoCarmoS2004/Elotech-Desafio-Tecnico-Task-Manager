@@ -1,4 +1,4 @@
-package br.com.elotech.desafio.backend.taskmanager.services;
+package br.com.elotech.desafio.backend.taskmanager.services.units;
 
 import br.com.elotech.desafio.backend.taskmanager.domain.dtos.gets.UserGetDTO;
 import br.com.elotech.desafio.backend.taskmanager.domain.dtos.posts.UserPostDTO;
@@ -12,6 +12,7 @@ import br.com.elotech.desafio.backend.taskmanager.mappers.UserMapper;
 import br.com.elotech.desafio.backend.taskmanager.security.dtos.gets.UserLoginValidationGetDTO;
 import br.com.elotech.desafio.backend.taskmanager.security.dtos.gets.UserWithTokenGetDTO;
 import br.com.elotech.desafio.backend.taskmanager.security.services.TokenService;
+import br.com.elotech.desafio.backend.taskmanager.services.UserService;
 import br.com.elotech.desafio.backend.taskmanager.utils.MessageUtils;
 import br.com.elotech.desafio.backend.taskmanager.validation.UserValidation;
 import org.junit.jupiter.api.DisplayName;

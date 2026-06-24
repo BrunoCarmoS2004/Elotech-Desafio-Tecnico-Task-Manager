@@ -1,4 +1,4 @@
-package br.com.elotech.desafio.backend.taskmanager.services;
+package br.com.elotech.desafio.backend.taskmanager.services.units;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,6 +16,9 @@ import br.com.elotech.desafio.backend.taskmanager.domain.enums.UserProjectStatus
 import br.com.elotech.desafio.backend.taskmanager.domain.repositories.ProjectMembersRepository;
 import br.com.elotech.desafio.backend.taskmanager.exceptions.NotFoundException;
 import br.com.elotech.desafio.backend.taskmanager.mappers.ProjectMembersMapper;
+import br.com.elotech.desafio.backend.taskmanager.services.ProjectMembersService;
+import br.com.elotech.desafio.backend.taskmanager.services.ProjectService;
+import br.com.elotech.desafio.backend.taskmanager.services.UserService;
 import br.com.elotech.desafio.backend.taskmanager.utils.MessageUtils;
 import br.com.elotech.desafio.backend.taskmanager.validation.ProjectMembersValidation;
 import org.junit.jupiter.api.DisplayName;
