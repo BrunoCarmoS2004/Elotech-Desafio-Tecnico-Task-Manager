@@ -50,6 +50,17 @@ public class UserController {
         );
     }
 
+    @GetMapping("/email/{email}")
+    public ResponseEntity<ResponsePayload<UserGetDTO>> getUserByEmail(@PathVariable String email) {
+        UserGetDTO userGetDTO = usuarioService.getUserByEmail(email);
+        return createResponse(
+                HttpStatus.OK,
+                userGetDTO.id(),
+                userGetDTO,
+                messageUtils.getMessage("user.found")
+        );
+    }
+
     @PostMapping
     public ResponseEntity<ResponsePayload<UserWithTokenGetDTO>> postUser(@Valid @RequestBody UserPostDTO userPostDTO) {
         UserWithTokenGetDTO userWithTokenGetDTO = usuarioService.postUser(userPostDTO);

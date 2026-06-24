@@ -54,4 +54,12 @@ public class TaskLog {
     @Embedded
     private CommonData commonData = new CommonData();
 
+    public TaskLog(Task task, User user, String alteredField, String oldValue, String newValue) {
+        this.task = task;
+        this.user = user;
+        this.alteredField = alteredField;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+        this.alteredDate = LocalDateTime.now();
+    }
 }

@@ -7,6 +7,7 @@ import java.util.UUID;
 public record UserLoginValidationGetDTO(
         UUID id,
         Role role,
+        String email,
         String password
 ) {
 }

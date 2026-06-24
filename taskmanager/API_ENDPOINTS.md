@@ -15,15 +15,27 @@ Base URL padrão: `http://localhost:8080`
 ### Endpoints com payload
 ```json
 {
-  "status": 200,
   "id": "uuid",
-  "data": {},
-  "message": "Mensagem"
+  "message": "Mensagem",
+  "data": {}
 }
 ```
 
 ### Endpoints paginados
 Padrão de resposta utilizando o `PagedModel` do Spring.
+```json
+{
+  "content": [
+    {}
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 1,
+    "totalPages": 1
+  }
+}
+```
 
 ### Erro
 Tratamento padrão do Spring/ExceptionsHandler.
@@ -46,6 +58,14 @@ Público
 }
 ```
 
+### Retorno
+```json
+{
+  "token": "jwt_token",
+  "refreshToken": "jwt_refresh_token"
+}
+```
+
 ## POST /auth/refresh
 Renova a sessão com base no refresh token.
 
@@ -56,6 +76,14 @@ Público
 ```json
 {
   "refreshToken": "jwt"
+}
+```
+
+### Retorno
+```json
+{
+  "token": "jwt_token",
+  "refreshToken": "jwt_refresh_token"
 }
 ```
 
@@ -79,11 +107,53 @@ Público
 }
 ```
 
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Usuário criado com sucesso",
+  "data": {
+    "user": {
+      "id": "uuid",
+      "name": "Nome do Usuário",
+      "email": "user@example.com",
+      "role": "ADMIN",
+      "entityStatus": "ACTIVE"
+    },
+    "tokenResponse": {
+      "token": "jwt_token",
+      "refreshToken": "jwt_refresh_token"
+    }
+  }
+}
+```
+
 ## GET /user
 Lista todos os usuários.
 
 ### Permissão
 `ADMIN`
+
+### Retorno
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "name": "Nome do Usuário",
+      "email": "user@example.com",
+      "role": "ADMIN",
+      "entityStatus": "ACTIVE"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 1,
+    "totalPages": 1
+  }
+}
+```
 
 ## GET /user/{id}
 Busca usuário por ID.
@@ -91,11 +161,56 @@ Busca usuário por ID.
 ### Permissão
 Autenticado
 
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Usuário encontrado",
+  "data": {
+    "id": "uuid",
+    "name": "Nome do Usuário",
+    "email": "user@example.com",
+    "role": "ADMIN",
+    "entityStatus": "ACTIVE"
+  }
+}
+```
+
+## GET /user/email/{email}
+Busca usuário por e-mail.
+
+### Permissão
+Autenticado
+
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Usuário encontrado",
+  "data": {
+    "id": "uuid",
+    "name": "Nome do Usuário",
+    "email": "user@example.com",
+    "role": "ADMIN",
+    "entityStatus": "ACTIVE"
+  }
+}
+```
+
 ## PATCH /user/change/{id}/name
 Altera o nome do usuário.
 
 ### Permissão
 Autenticado
+
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Nome do usuário atualizado",
+  "data": "Novo Nome do Usuário"
+}
+```
 
 ## PATCH /user/change/{id}/role
 Altera a role do usuário.
@@ -103,11 +218,29 @@ Altera a role do usuário.
 ### Permissão
 `ADMIN`
 
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Role do usuário atualizada",
+  "data": "MANAGER"
+}
+```
+
 ## PATCH /user/change/{id}/entitystatus
 Altera o status da entidade do usuário (ex: ACTIVE, INACTIVE).
 
 ### Permissão
 Autenticado
+
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Status da entidade atualizado",
+  "data": "INACTIVE"
+}
+```
 
 ---
 
@@ -131,11 +264,61 @@ Cria um projeto.
 }
 ```
 
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Projeto criado com sucesso",
+  "data": {
+    "id": "uuid",
+    "name": "Nome do Projeto",
+    "description": "Descrição detalhada do projeto",
+    "creatorId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "members": [
+      {
+        "id": "uuid",
+        "projectId": "uuid",
+        "userId": "uuid",
+        "userProjectStatus": "ACTIVE"
+      }
+    ]
+  }
+}
+```
+
 ## GET /project
 Lista todos os projetos com paginação.
 
 ### Permissão
 `ADMIN`
+
+### Retorno
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "name": "Nome do Projeto",
+      "description": "Descrição do projeto",
+      "creatorId": "uuid",
+      "members": [
+        {
+          "id": "uuid",
+          "projectId": "uuid",
+          "userId": "uuid",
+          "userProjectStatus": "ACTIVE"
+        }
+      ]
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 1,
+    "totalPages": 1
+  }
+}
+```
 
 ## GET /project/{id}
 Busca projeto por ID.
@@ -143,17 +326,95 @@ Busca projeto por ID.
 ### Permissão
 Autenticado
 
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Projeto encontrado",
+  "data": {
+    "id": "uuid",
+    "name": "Nome do Projeto",
+    "description": "Descrição do projeto",
+    "creatorId": "uuid",
+    "members": [
+      {
+        "id": "uuid",
+        "projectId": "uuid",
+        "userId": "uuid",
+        "userProjectStatus": "ACTIVE"
+      }
+    ]
+  }
+}
+```
+
 ## GET /project/creator/{creatorId}
 Lista projetos pelo ID do criador.
 
 ### Permissão
 `ADMIN`, `MANAGER`
 
+### Retorno
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "name": "Nome do Projeto",
+      "description": "Descrição do projeto",
+      "creatorId": "uuid",
+      "members": [
+        {
+          "id": "uuid",
+          "projectId": "uuid",
+          "userId": "uuid",
+          "userProjectStatus": "ACTIVE"
+        }
+      ]
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 1,
+    "totalPages": 1
+  }
+}
+```
+
 ## GET /project/member/{memberId}
 Lista projetos pelo ID do membro.
 
 ### Permissão
 `ADMIN`, `MEMBER`, `MEMBER_MANAGER`
+
+### Retorno
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "name": "Nome do Projeto",
+      "description": "Descrição do projeto",
+      "creatorId": "uuid",
+      "members": [
+        {
+          "id": "uuid",
+          "projectId": "uuid",
+          "userId": "uuid",
+          "userProjectStatus": "ACTIVE"
+        }
+      ]
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 1,
+    "totalPages": 1
+  }
+}
+```
 
 ## PUT /project/{id}
 Atualiza os dados de um projeto.
@@ -166,6 +427,28 @@ Atualiza os dados de um projeto.
 {
   "name": "Nome do Projeto Atualizado",
   "description": "Descrição atualizada do projeto"
+}
+```
+
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Projeto atualizado",
+  "data": {
+    "id": "uuid",
+    "name": "Nome do Projeto Atualizado",
+    "description": "Descrição atualizada do projeto",
+    "creatorId": "uuid",
+    "members": [
+      {
+        "id": "uuid",
+        "projectId": "uuid",
+        "userId": "uuid",
+        "userProjectStatus": "ACTIVE"
+      }
+    ]
+  }
 }
 ```
 
@@ -189,11 +472,50 @@ Adiciona membros a um projeto.
 }
 ```
 
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Membros adicionados ao projeto com sucesso",
+  "data": {
+    "projectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "membersAdded": [
+      {
+        "id": "uuid",
+        "projectId": "uuid",
+        "userId": "uuid",
+        "userProjectStatus": "ACTIVE"
+      }
+    ]
+  }
+}
+```
+
 ## GET /members
 Lista os vínculos de membros.
 
 ### Permissão
 `ADMIN`
+
+### Retorno
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "projectId": "uuid",
+      "userId": "uuid",
+      "userProjectStatus": "ACTIVE"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 1,
+    "totalPages": 1
+  }
+}
+```
 
 ## GET /members/{id}
 Busca um vínculo de membro por ID.
@@ -201,11 +523,45 @@ Busca um vínculo de membro por ID.
 ### Permissão
 Autenticado
 
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Membro encontrado",
+  "data": {
+    "id": "uuid",
+    "projectId": "uuid",
+    "userId": "uuid",
+    "userProjectStatus": "ACTIVE"
+  }
+}
+```
+
 ## GET /members/project/{projectId}
 Lista todos os membros de um determinado projeto.
 
 ### Permissão
 Autenticado
+
+### Retorno
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "projectId": "uuid",
+      "userId": "uuid",
+      "userProjectStatus": "ACTIVE"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 1,
+    "totalPages": 1
+  }
+}
+```
 
 ## GET /members/member/{memberId}
 Lista os projetos vinculados a um determinado membro.
@@ -213,11 +569,40 @@ Lista os projetos vinculados a um determinado membro.
 ### Permissão
 Autenticado
 
+### Retorno
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "projectId": "uuid",
+      "userId": "uuid",
+      "userProjectStatus": "ACTIVE"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 1,
+    "totalPages": 1
+  }
+}
+```
+
 ## PATCH /members/change/{id}/status
 Altera o status de um membro no projeto.
 
 ### Permissão
 Autenticado na API REST via `@PatchMapping`. (Obs: Na configuração de segurança do Spring `FilterConfiguration`, consta exigência de roles `ADMIN`, `MANAGER`, `MEMBER_MANAGER` para o método `POST` em `/members/change/*/status`).
+
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Status do membro atualizado",
+  "data": "INACTIVE"
+}
+```
 
 ---
 
@@ -242,17 +627,86 @@ Autenticado
 }
 ```
 
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Tarefa criada com sucesso",
+  "data": {
+    "id": "uuid",
+    "title": "Título da Tarefa",
+    "description": "Descrição da tarefa",
+    "status": "PENDING",
+    "priority": "HIGH",
+    "deadline": "2026-12-31T23:59:59",
+    "responsibleId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "projectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "entityStatus": "ACTIVE",
+    "createdAt": "2026-06-23T15:00:00",
+    "updatedAt": "2026-06-23T15:00:00"
+  }
+}
+```
+
 ## GET /task
 Lista tarefas com paginação.
 
 ### Permissão
 Autenticado (via fallback, pois a `FilterConfiguration` mapeia `/tasks` para `ADMIN`, mas o controller está em `/task`).
 
+### Retorno
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "title": "Título da Tarefa",
+      "description": "Descrição da tarefa",
+      "status": "PENDING",
+      "priority": "HIGH",
+      "deadline": "2026-12-31T23:59:59",
+      "responsibleId": "uuid",
+      "projectId": "uuid",
+      "entityStatus": "ACTIVE",
+      "createdAt": "2026-06-23T15:00:00",
+      "updatedAt": "2026-06-23T15:00:00"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 1,
+    "totalPages": 1
+  }
+}
+```
+
 ## GET /task/{id}
 Busca tarefa por ID.
 
 ### Permissão
 Autenticado
+
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Tarefa encontrada",
+  "data": {
+    "id": "uuid",
+    "title": "Título da Tarefa",
+    "description": "Descrição da tarefa",
+    "status": "PENDING",
+    "priority": "HIGH",
+    "deadline": "2026-12-31T23:59:59",
+    "responsibleId": "uuid",
+    "projectId": "uuid",
+    "entityStatus": "ACTIVE",
+    "createdAt": "2026-06-23T15:00:00",
+    "updatedAt": "2026-06-23T15:00:00"
+  }
+}
+```
 
 ## POST /task/filters
 Filtra tarefas baseado no body enviado.
@@ -269,6 +723,33 @@ Autenticado
   "startDate": "2026-01-01T00:00:00",
   "endDate": "2026-12-31T23:59:59",
   "searchText": "termo de busca"
+}
+```
+
+### Retorno
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "title": "Título da Tarefa",
+      "description": "Descrição da tarefa",
+      "status": "PENDING",
+      "priority": "HIGH",
+      "deadline": "2026-12-31T23:59:59",
+      "responsibleId": "uuid",
+      "projectId": "uuid",
+      "entityStatus": "ACTIVE",
+      "createdAt": "2026-06-23T15:00:00",
+      "updatedAt": "2026-06-23T15:00:00"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 1,
+    "totalPages": 1
+  }
 }
 ```
 
@@ -289,11 +770,41 @@ Autenticado
 }
 ```
 
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Tarefa atualizada",
+  "data": {
+    "id": "uuid",
+    "title": "Título da Tarefa Atualizado",
+    "description": "Nova descrição da tarefa",
+    "status": "IN_PROGRESS",
+    "priority": "MEDIUM",
+    "deadline": "2027-01-31T23:59:59",
+    "responsibleId": "uuid",
+    "projectId": "uuid",
+    "entityStatus": "ACTIVE",
+    "createdAt": "2026-06-23T15:00:00",
+    "updatedAt": "2026-06-23T16:00:00"
+  }
+}
+```
+
 ## PATCH /task/change/{id}/status
 Altera o status de uma tarefa.
 
 ### Permissão
 Autenticado
+
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Status da tarefa atualizado",
+  "data": "IN_PROGRESS"
+}
+```
 
 ## PATCH /task/change/{id}/priority
 Altera a prioridade de uma tarefa.
@@ -301,11 +812,29 @@ Altera a prioridade de uma tarefa.
 ### Permissão
 Autenticado
 
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Prioridade da tarefa atualizada",
+  "data": "MEDIUM"
+}
+```
+
 ## PATCH /task/change/{id}/responsible/{responsibleId}
 Muda o responsável de uma tarefa.
 
 ### Permissão
 Autenticado
+
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Responsável da tarefa atualizado",
+  "data": "uuid"
+}
+```
 
 ---
 
@@ -316,6 +845,59 @@ Gera relatório do projeto (DTO).
 
 ### Permissão
 Autenticado
+
+### Retorno
+```json
+{
+  "id": "uuid",
+  "message": "Relatório gerado",
+  "data": {
+    "byStatus": {
+      "PENDING": 3,
+      "IN_PROGRESS": 5,
+      "COMPLETED": 2
+    },
+    "byPriority": {
+      "LOW": 2,
+      "MEDIUM": 4,
+      "HIGH": 4
+    }
+  }
+}
+```
+
+---
+
+# 7. Histórico de Tarefas (Task Log)
+
+## GET /log/task/{id}
+Lista o histórico de alterações (logs) de uma tarefa específica, com paginação.
+
+### Permissão
+Autenticado
+
+### Retorno
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "taskId": "uuid",
+      "userId": "uuid",
+      "alteredField": "status",
+      "oldValue": "PENDING",
+      "newValue": "IN_PROGRESS",
+      "alteredDate": "2026-06-23T15:00:00"
+    }
+  ],
+  "page": {
+    "size": 20,
+    "number": 0,
+    "totalElements": 1,
+    "totalPages": 1
+  }
+}
+```
 
 ---
 

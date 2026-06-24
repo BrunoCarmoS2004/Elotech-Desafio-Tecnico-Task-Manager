@@ -506,6 +506,34 @@
           }
         },
         {
+          "name": "GET /user/email/{email}",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/email/{{userEmail}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "email",
+                "{{userEmail}}"
+              ]
+            },
+            "description": "Busca e retorna os detalhes de um usuário através do seu e-mail.\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        },
+        {
           "name": "POST /user (MANAGER)",
           "event": [
             {
@@ -1532,6 +1560,53 @@
               ]
             },
             "description": "Endpoint analítico. Gera e retorna um relatório completo do projeto especificado, consolidando métricas (ex: quantidade de tarefas em andamento, concluídas, total de membros, etc).\n\n**Permissões (Roles):** Qualquer usuário autenticado"
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Task Log",
+      "item": [
+        {
+          "name": "GET /log/task/{id}",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/log/task/{{taskId}}?page=0&size=10&sort=commonData.createdAt,desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "log",
+                "task",
+                "{{taskId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "commonData.createdAt,desc"
+                }
+              ]
+            },
+            "description": "Retorna uma lista paginada com o histórico de logs de uma tarefa específica.\n\n**Permissões (Roles):** Qualquer usuário autenticado"
           }
         }
       ]

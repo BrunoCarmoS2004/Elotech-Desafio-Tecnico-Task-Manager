@@ -35,7 +35,6 @@ public class FilterConfiguration {
                         .requestMatchers(HttpMethod.GET, "/user", "/project", "/members", "/tasks").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/user/change/*/role").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/project/creator/**").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.GET, "/project/member/**").hasAnyRole("ADMIN", "MEMBER", "MEMBER_MANAGER")
                         .requestMatchers(HttpMethod.POST, "/project").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.PUT, "/project/*").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.POST, "/members/add").hasAnyRole("ADMIN", "MANAGER", "MEMBER_MANAGER")

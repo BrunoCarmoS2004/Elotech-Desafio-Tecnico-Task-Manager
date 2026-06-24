@@ -8,6 +8,8 @@ import br.com.elotech.desafio.backend.taskmanager.domain.enums.Role;
 import br.com.elotech.desafio.backend.taskmanager.domain.enums.TaskPriority;
 import br.com.elotech.desafio.backend.taskmanager.domain.enums.TaskStatus;
 import br.com.elotech.desafio.backend.taskmanager.domain.models.Task;
+import br.com.elotech.desafio.backend.taskmanager.domain.models.TaskLog;
+import br.com.elotech.desafio.backend.taskmanager.domain.models.User;
 import br.com.elotech.desafio.backend.taskmanager.domain.repositories.TaskRepository;
 import br.com.elotech.desafio.backend.taskmanager.domain.specifications.TaskSpecification;
 import br.com.elotech.desafio.backend.taskmanager.exceptions.NotFoundException;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 import static br.com.elotech.desafio.backend.taskmanager.utils.ServiceUtils.getRoleFromToken;
+import static br.com.elotech.desafio.backend.taskmanager.utils.ServiceUtils.getUserIdFromToken;
 
 @Service
 public class TaskService {
@@ -34,9 +37,10 @@ public class TaskService {
     private final ProjectService projectService;
     private final ProjectMembersService projectMembersService;
     private final TaskValidation taskValidation;
+    private final TaskLogService taskLogService;
 
 
-    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper, MessageUtils messageUtils, UserService userService, ProjectService projectService, ProjectMembersService projectMembersService, TaskValidation taskValidation) {
+    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper, MessageUtils messageUtils, UserService userService, ProjectService projectService, ProjectMembersService projectMembersService, TaskValidation taskValidation, TaskLogService taskLogService) {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
         this.messageUtils = messageUtils;
@@ -44,6 +48,7 @@ public class TaskService {
         this.projectService = projectService;
         this.projectMembersService = projectMembersService;
         this.taskValidation = taskValidation;
+        this.taskLogService = taskLogService;
     }
 
     public PagedModel<TaskGetDTO> getAll(Pageable pageable) {
@@ -82,22 +87,25 @@ public class TaskService {
 
     public void changeTaskStatus(UUID taskId, TaskStatus taskStatus) {
         TaskGetDTO task = getTaskById(taskId);
-
         validateStatusChange(task, taskStatus);
-
         taskRepository.changeTaskStatusTo(taskStatus, taskId);
+        saveTaskLog(task.id(), "TaskStatus", task.status().name(), taskStatus.name());
     }
 
-    public void changeTaskPriority(UUID id, TaskPriority taskPriority) {
+    public void changeTaskPriority(UUID id, TaskPriority newTaskPriority) {
         taskExistsById(id);
-        taskRepository.changeTaskPriorityTo(taskPriority, id);
+        TaskPriority oldPriority = taskRepository.findTaskPriorityById(id);
+        taskRepository.changeTaskPriorityTo(newTaskPriority, id);
+        saveTaskLog(id, "TaskPriority", oldPriority.name(), newTaskPriority.name());
     }
 
-    public void changeTaskResponsible(UUID id, UUID responsibleId) {
+    public void changeTaskResponsible(UUID id, UUID newResponsibleId) {
         taskExistsById(id);
-        validateUserExists(responsibleId);
-        verifyResponsibleWipLimit(responsibleId);
-        taskRepository.changeResponsibleTo(responsibleId, id);
+        validateUserExists(newResponsibleId);
+        verifyResponsibleWipLimit(newResponsibleId);
+        UUID oldResponsibleId = taskRepository.findResponsibleIdById(id);
+        taskRepository.changeResponsibleTo(newResponsibleId, id);
+        saveTaskLog(id, "Responsible", oldResponsibleId.toString(), newResponsibleId.toString());
     }
 
     private void taskValidations(UUID responsibleId, UUID projectId){
@@ -109,6 +117,18 @@ public class TaskService {
 
     private void verifyResponsibleWipLimit(UUID responsibleId) {
         taskValidation.verifyResponsibleWipLimit(responsibleId);
+    }
+
+    private void saveTaskLog(UUID taskId, String alteredField, String oldValue, String newValue) {
+        Task task = taskRepository.getReferenceById(taskId);
+        User user = userService.getReferenceById(getUserIdFromToken());
+        taskLogService.saveTaskLog(new TaskLog(
+                task,
+                user,
+                alteredField,
+                oldValue,
+                newValue
+        ));
     }
 
     private void taskExistsById(UUID id) {

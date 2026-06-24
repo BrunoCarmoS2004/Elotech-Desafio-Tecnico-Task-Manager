@@ -24,4 +24,13 @@ public class ServiceUtils {
         }
         return null;
     }
+
+    public static UUID getUserIdFromToken() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
+            return UUID.fromString(jwt.getSubject());
+        }
+        return null;
+    }
 }

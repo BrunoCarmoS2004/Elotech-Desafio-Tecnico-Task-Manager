@@ -50,6 +50,12 @@ public interface TaskRepository extends JpaRepository<Task, UUID>, JpaSpecificat
             "t.commonData.updatedAt) FROM Task t")
     Page<TaskGetDTO> findAllTasks(Pageable pageable);
 
+    @Query("SELECT t.priority FROM Task t WHERE t.id = :id")
+    TaskPriority findTaskPriorityById(UUID id);
+
+    @Query("SELECT t.responsible.id FROM Task t WHERE t.id = :id")
+    UUID findResponsibleIdById(UUID id);
+
     @Query("SELECT t.status, COUNT(t) FROM Task t WHERE t.project.id = :projectId AND t.entityStatus = 'ACTIVE' GROUP BY t.status")
     List<Object[]> countTasksByStatusGrouped(UUID projectId);
 

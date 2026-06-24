@@ -1,0 +1,53 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h2>Criar Conta</h2>
+    <p class="subtitle">Cadastre-se para começar a organizar suas demandas</p>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="name">Nome Completo</label>
+        <input id="name" type="text" formControlName="name" placeholder="Seu nome" />
+        @if (registerForm.get('name')?.touched && registerForm.get('name')?.invalid) {
+          <span class="error-text">O nome deve conter ao menos 3 caracteres.</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input id="email" type="email" formControlName="email" placeholder="exemplo@email.com" />
+        @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
+          <span class="error-text">Insira um e-mail válido.</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input id="password" type="password" formControlName="password" placeholder="Mínimo 8 caracteres" />
+        @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
+          <span class="error-text">Senha inválida (mínimo de 8 caracteres).</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="role">Perfil (Role)</label>
+        <select id="role" formControlName="role">
+          @for (role of roles; track role) {
+            <option [value]="role">{{ role }}</option>
+          }
+        </select>
+      </div>
+
+      @if (errorMessage) {
+        <div class="alert alert-danger">{{ errorMessage }}</div>
+      }
+
+      <button type="submit" [disabled]="isLoading">
+        {{ isLoading ? 'Criando conta...' : 'Cadastrar' }}
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      Já possui conta? <a routerLink="/login">Faça Login</a>
+    </p>
+  </div>
+</div>

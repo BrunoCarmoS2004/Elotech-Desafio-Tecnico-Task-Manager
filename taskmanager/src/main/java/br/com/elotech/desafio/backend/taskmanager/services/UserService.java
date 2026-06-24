@@ -74,6 +74,12 @@ public class UserService {
         );
     }
 
+    public UserGetDTO getUserByEmail(String email) {
+        return usuarioRepository.findByEmail(email, UserGetDTO.class).orElseThrow(
+                () -> new NotFoundException(messageUtils.getMessage("user.not-found"))
+        );
+    }
+
     public UserWithTokenGetDTO postUser(@Valid UserPostDTO userPostDTO) {
         userValidation.userExistsByEmail(userPostDTO.email());
         User user = saveAndReturn(userPostDTO);
@@ -115,7 +121,7 @@ public class UserService {
     }
 
     private void generateTokenResponse(User user){
-        UserLoginValidationGetDTO userTokenGetDTO = new UserLoginValidationGetDTO(user.getId(), user.getRole(), user.getPassword());
+        UserLoginValidationGetDTO userTokenGetDTO = new UserLoginValidationGetDTO(user.getId(), user.getRole(), user.getEmail(), user.getPassword());
         user.setTokenResponse(tokenService.generateTokenResponse(userTokenGetDTO));
     }
 

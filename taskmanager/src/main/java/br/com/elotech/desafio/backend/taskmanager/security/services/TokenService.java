@@ -64,6 +64,7 @@ public class TokenService {
                 .expiresAt(now.plus(amountToAdd, chronoUnit))
                 .subject(userLoginValidationGetDTO.id().toString())
                 .claim("roles", userLoginValidationGetDTO.role())
+                .claim("email", userLoginValidationGetDTO.email())
                 .claim("token_type", tokenType)
                 .build();
 

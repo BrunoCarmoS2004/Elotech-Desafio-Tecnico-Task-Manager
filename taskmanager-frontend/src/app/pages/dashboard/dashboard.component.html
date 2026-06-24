@@ -1,0 +1,562 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <div>
+      <h1>Painel de Controle</h1>
+      @if (projectService.userProjects().length > 0) {
+        <div class="project-selector">
+          <label for="activeProject">Projeto Ativo: </label>
+          <select
+            id="activeProject"
+            [value]="projectService.currentProject()?.id"
+            (change)="onProjectChange($any($event.target).value)"
+          >
+            @for (proj of projectService.userProjects(); track proj.id) {
+              <option [value]="proj.id">{{ proj.name }}</option>
+            }
+          </select>
+        </div>
+      }
+    </div>
+
+    <div class="actions-area">
+      @if (canCreateProject()) {
+        <button class="btn btn-primary" (click)="toggleCreateForm()">
+          {{ showCreateForm() ? "Cancelar" : "+ Novo Projeto" }}
+        </button>
+      }
+
+      @if (canCreateProject() && projectService.currentProject()) {
+        <button class="btn btn-member-nav" (click)="toggleMemberForm()">
+          {{ showMemberForm() ? "Fechar Membros" : "Adicionar membros" }}
+        </button>
+      }
+      @if (canCreateProject() && projectService.currentProject()) {
+        <button (click)="generateReport()" class="btn-report">
+          Ver Relatório
+        </button>
+      }
+
+      @if (isAdmin()) {
+        <button class="btn btn-secondary" (click)="loadAdminView('USERS')">
+          Listar Usuários
+        </button>
+        <button class="btn btn-secondary" (click)="loadAdminView('PROJECTS')">
+          Todos Projetos
+        </button>
+        <button class="btn btn-secondary" (click)="loadAdminView('TASKS')">
+          Todas as Tasks
+        </button>
+      }
+      <button class="btn btn-secondary" (click)="logout()">Sair</button>
+    </div>
+  </header>
+
+  @if (adminViewType()) {
+    <div class="modal-overlay">
+      <div class="modal-content">
+        <section class="form-card-section admin-table-section">
+          <div class="admin-table-header">
+            <h3>Painel Geral de Gerenciamento: {{ adminViewType() }}</h3>
+            <button class="btn btn-cancel font-sm" (click)="closeAdminView()">
+              Fechar Painel Geral
+            </button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Identificador (ID)</th>
+                <th>Nome / Título</th>
+                @if (adminViewType() === "USERS") {
+                  <th>E-mail</th>
+                  <th>Perfil (Role)</th>
+                }
+                @if (adminViewType() === "PROJECTS") {
+                  <th>Descrição</th>
+                }
+                @if (adminViewType() === "TASKS") {
+                  <th>Status</th>
+                  <th>Prioridade</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of adminPaginatedData(); track item.id) {
+                <tr>
+                  <td>
+                    <code>{{ item.id }}</code>
+                  </td>
+                  <td>
+                    <strong>{{ item.name || item.title }}</strong>
+                  </td>
+                  @if (adminViewType() === "USERS") {
+                    <td>{{ item.email }}</td>
+                    <td>
+                      <span class="badge badge-low">{{ item.role }}</span>
+                    </td>
+                  }
+                  @if (adminViewType() === "PROJECTS") {
+                    <td>{{ item.description }}</td>
+                  }
+                  @if (adminViewType() === "TASKS") {
+                    <td>
+                      <span class="badge badge-done">{{ item.status }}</span>
+                    </td>
+                    <td>
+                      <span
+                        class="badge"
+                        [className]="'badge-' + item.priority.toLowerCase()"
+                        >{{ item.priority }}</span
+                      >
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+          <div class="pagination-controls">
+            <button
+              class="btn btn-cancel"
+              [disabled]="currentPage() === 0"
+              (click)="changeAdminPage(-1)"
+            >
+              ◀ Anterior
+            </button>
+            <span
+              >Página <strong>{{ currentPage() + 1 }}</strong> de
+              {{ totalPages() }}</span
+            >
+            <button
+              class="btn btn-cancel"
+              [disabled]="currentPage() + 1 >= totalPages()"
+              (click)="changeAdminPage(1)"
+            >
+              Próxima ▶
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  }
+  @if (showReportModal() && projectReport()) {
+    <div
+      *ngIf="showReportModal() && projectReport() as report"
+      class="modal-backdrop"
+      (click)="closeReportModal()"
+    >
+      <div
+        class="modal-content animate-fade-in"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="modal-header">
+          <h2>Relatório do Projeto</h2>
+          <button class="btn-close" (click)="closeReportModal()">
+            &times;
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="report-section">
+            <h3>Tarefas por Status</h3>
+            <div class="report-grid">
+              <div class="report-card status-pending">
+                <span class="label">Pendentes (TODO)</span>
+                <span class="value">{{ report.byStatus.PENDING }}</span>
+              </div>
+              <div class="report-card status-progress">
+                <span class="label">Em Andamento</span>
+                <span class="value">{{ report.byStatus.IN_PROGRESS }}</span>
+              </div>
+              <div class="report-card status-completed">
+                <span class="label">Concluídas</span>
+                <span class="value">{{ report.byStatus.COMPLETED }}</span>
+              </div>
+            </div>
+          </div>
+
+          <hr class="divider" />
+
+          <div class="report-section">
+            <h3>Tarefas por Prioridade</h3>
+            <div class="report-grid">
+              <div class="report-card priority-low">
+                <span class="label">Baixa</span>
+                <span class="value">{{ report.byPriority.LOW }}</span>
+              </div>
+              <div class="report-card priority-medium">
+                <span class="label">Média</span>
+                <span class="value">{{ report.byPriority.MEDIUM }}</span>
+              </div>
+              <div class="report-card priority-high">
+                <span class="label">Alta</span>
+                <span class="value">{{ report.byPriority.HIGH }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-primary" (click)="closeReportModal()">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showCreateForm() && canCreateProject()) {
+    <section class="form-card-section">
+      <h3>Criar Novo Projeto</h3>
+      <form [formGroup]="projectForm" (ngSubmit)="onSubmitProject()">
+        <div class="form-group">
+          <label for="projName">Nome do Projeto</label>
+          <input
+            id="projName"
+            type="text"
+            formControlName="name"
+            placeholder="Ex: API Financeira"
+          />
+        </div>
+        <div class="form-group">
+          <label for="projDesc">Descrição</label>
+          <textarea
+            id="projDesc"
+            formControlName="description"
+            placeholder="Sobre o que é este projeto..."
+          ></textarea>
+        </div>
+        <button
+          type="submit"
+          class="btn btn-success"
+          [disabled]="projectForm.invalid"
+        >
+          Salvar Projeto
+        </button>
+      </form>
+    </section>
+  }
+
+  @if (
+    showMemberForm() && canCreateProject() && projectService.currentProject()
+  ) {
+    <section class="form-card-section member-section">
+      <h3>Adicionar Membro ao Projeto</h3>
+      <p class="section-subtitle">
+        Vinculando ao projeto:
+        <strong>{{ projectService.currentProject()?.name }}</strong>
+      </p>
+
+      <div class="search-inline-group">
+        <div class="form-group flex-1">
+          <label for="searchEmail">E-mail do Usuário</label>
+          <input
+            id="searchEmail"
+            type="email"
+            [(ngModel)]="searchEmail"
+            placeholder="Digite o e-mail exato cadastrado..."
+            (keyup.enter)="onSearchMember()"
+          />
+        </div>
+        <button
+          type="button"
+          class="btn btn-task search-btn"
+          [disabled]="isSearching() || !searchEmail()"
+          (click)="onSearchMember()"
+        >
+          {{ isSearching() ? "Buscando..." : "Buscar" }}
+        </button>
+      </div>
+      @if (memberError()) {
+        <div class="alert alert-danger font-sm">{{ memberError() }}</div>
+      }
+      @if (foundUser(); as user) {
+        <div class="user-result-card" (click)="onAddMember(user)">
+          <div class="user-info">
+            <span class="user-avatar"></span>
+            <div>
+              <h4>{{ user.name }}</h4>
+              <p>
+                {{ user.email }} —
+                <small class="role-badge">{{ user.role }}</small>
+              </p>
+            </div>
+          </div>
+          <span class="add-action-text"
+            >Clique aqui para adicionar ao projeto</span
+          >
+        </div>
+      }
+    </section>
+  }
+
+  <div class="task-actions-nav">
+    @if (canManageTasks() && projectService.currentProject()) {
+      <button class="btn btn-task" (click)="toggleTaskForm()">
+        {{ showTaskForm() ? "Fechar Formulário" : "Nova Tarefa" }}
+      </button>
+    }
+  </div>
+
+  @if (showTaskForm() && canManageTasks()) {
+    <section class="form-card-section">
+      <h3>
+        {{ editingTask() ? "Editar Tarefa" : "Nova Tarefa para o Projeto" }}
+      </h3>
+      <form [formGroup]="taskForm" (ngSubmit)="onSubmitTask()">
+        <div class="form-group">
+          <label for="taskTitle">Título da Demanda</label>
+          <input
+            id="taskTitle"
+            type="text"
+            formControlName="title"
+            placeholder="Ex: Ajustar CORS no Spring"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="taskPriority">Prioridade</label>
+          <select id="taskPriority" formControlName="priority">
+            <option value="LOW">Baixa</option>
+            <option value="MEDIUM">Média</option>
+            <option value="HIGH">Alta</option>
+            <option value="CRITICAL">Crítica</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="taskDeadline">Data Limite (Deadline)</label>
+          <input
+            id="taskDeadline"
+            type="date"
+            [min]="minDate"
+            formControlName="deadline"
+          />
+          @if (taskForm.get("deadline")?.errors?.["pastDate"]) {
+            <span class="error-text"
+              >A data de entrega deve ser igual ou maior que a data de
+              hoje.</span
+            >
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="taskDesc">Descrição da Atividade</label>
+          <textarea
+            id="taskDesc"
+            formControlName="description"
+            placeholder="Escreva os critérios de aceite..."
+          ></textarea>
+        </div>
+
+        <div class="flex-actions">
+          <button
+            type="submit"
+            class="btn btn-success"
+            [disabled]="taskForm.invalid"
+          >
+            {{ editingTask() ? "Atualizar Atividade" : "Cadastrar Atividade" }}
+          </button>
+          @if (editingTask()) {
+            <button
+              type="button"
+              class="btn btn-cancel"
+              (click)="closeTaskModal()"
+            >
+              Cancelar
+            </button>
+          }
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (isMemberOnly() && hasNoProjects()) {
+    <div class="alert-info-box">
+      <p>
+        Você não está vinculado a nenhum projeto, espere até que alguém o
+        vincule.
+      </p>
+    </div>
+  } @else {
+    @if (projectService.currentProject()) {
+      <main class="board-wrapper" cdkDropListGroup>
+        <div class="kanban-column">
+          <h3>A Fazer ({{ todoTasks().length }})</h3>
+          <div
+            cdkDropList
+            [cdkDropListData]="todoTasks()"
+            (cdkDropListDropped)="drop($event, 'TODO')"
+            class="task-list-dropzone"
+          >
+            @for (task of todoTasks(); track task.id) {
+              <div class="task-card" cdkDrag (click)="openTaskLogs(task)">
+                <div class="task-card-header">
+                  <h4>{{ task.title }}</h4>
+                  @if (canManageTasks()) {
+                    <div class="card-actions">
+                      <button
+                        title="Editar"
+                        (click)="openEditModal(task, $event)"
+                      >
+                        ✏️
+                      </button>
+                    </div>
+                  }
+                </div>
+                <p>{{ task.description }}</p>
+                <span
+                  class="badge"
+                  [className]="'badge-' + task.priority.toLowerCase()"
+                  >{{ task.priority }}</span
+                >
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="kanban-column">
+          <h3>Em Progresso ({{ inProgressTasks().length }})</h3>
+          <div
+            cdkDropList
+            [cdkDropListData]="inProgressTasks()"
+            (cdkDropListDropped)="drop($event, 'IN_PROGRESS')"
+            class="task-list-dropzone"
+          >
+            @for (task of inProgressTasks(); track task.id) {
+              <div class="task-card" cdkDrag (click)="openTaskLogs(task)">
+                <div class="task-card-header">
+                  <h4>{{ task.title }}</h4>
+                  @if (canManageTasks()) {
+                    <div class="card-actions">
+                      <button
+                        title="Editar"
+                        (click)="openEditModal(task, $event)"
+                      >
+                        ✏️
+                      </button>
+                    </div>
+                  }
+                </div>
+                <p>{{ task.description }}</p>
+                <span
+                  class="badge"
+                  [className]="'badge-' + task.priority.toLowerCase()"
+                  >{{ task.priority }}</span
+                >
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="kanban-column">
+          <h3>Concluído ({{ doneTasks().length }})</h3>
+          <div
+            cdkDropList
+            [cdkDropListData]="doneTasks()"
+            (cdkDropListDropped)="drop($event, 'DONE')"
+            class="task-list-dropzone"
+          >
+            @for (task of doneTasks(); track task.id) {
+              <div class="task-card" cdkDrag (click)="openTaskLogs(task)">
+                <div class="task-card-header">
+                  <h4>{{ task.title }}</h4>
+                  @if (canManageTasks()) {
+                    <div class="card-actions">
+                      <button
+                        title="Editar"
+                        (click)="openEditModal(task, $event)"
+                      >
+                        ✏️
+                      </button>
+                    </div>
+                  }
+                </div>
+                <p>{{ task.description }}</p>
+                <span class="badge badge-done">Done</span>
+              </div>
+            }
+          </div>
+        </div>
+      </main>
+    } @else {
+      <div class="alert-info-box">
+        <p>
+          Nenhum projeto ativo selecionado. Crie ou seja vinculado a um projeto
+          para iniciar.
+        </p>
+      </div>
+    }
+  }
+
+  @if (selectedTaskForLogs(); as task) {
+    <div class="modal-overlay">
+      <div class="modal-content">
+        <section class="form-card-section admin-table-section">
+          <div class="admin-table-header">
+            <h3>📜 Histórico: {{ task.title }}</h3>
+            <button class="btn btn-cancel font-sm" (click)="closeTaskLogs()">
+              Fechar Histórico
+            </button>
+          </div>
+
+          <div class="modal-body">
+            @if (taskLogs().length === 0) {
+              <p class="empty-text">Nenhuma alteração registrada.</p>
+            } @else {
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Data/Hora</th>
+                    <th>Ação</th>
+                    <th>Modificação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (log of taskLogs(); track log.id) {
+                    <tr>
+                      <td>
+                        <code>{{
+                          log.alteredDate | date: "dd/MM/yy HH:mm"
+                        }}</code>
+                      </td>
+                      <td>
+                        <strong>{{ log.alteredField }}</strong>
+                      </td>
+                      <td>
+                        <span class="badge badge-low">{{ log.oldValue }}</span>
+                        <span> ➔ </span>
+                        <span class="badge badge-done">{{ log.newValue }}</span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+
+              @if (logTotalPages() > 1) {
+                <div class="pagination-controls">
+                  <button
+                    class="btn btn-cancel"
+                    [disabled]="logCurrentPage() === 0"
+                    (click)="changeLogPage(-1)"
+                  >
+                    ◀ Anterior
+                  </button>
+                  <span
+                    >Página <strong>{{ logCurrentPage() + 1 }}</strong> de
+                    {{ logTotalPages() }}</span
+                  >
+                  <button
+                    class="btn btn-cancel"
+                    [disabled]="logCurrentPage() + 1 >= logTotalPages()"
+                    (click)="changeLogPage(1)"
+                  >
+                    Próxima ▶
+                  </button>
+                </div>
+              }
+            }
+          </div>
+        </section>
+      </div>
+    </div>
+  }
+</div>

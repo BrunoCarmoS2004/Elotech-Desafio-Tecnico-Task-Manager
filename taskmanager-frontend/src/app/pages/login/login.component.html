@@ -1,0 +1,51 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h2>TaskManager</h2>
+    <p class="subtitle">Acesse sua conta para gerenciar suas tarefas</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input 
+          id="email" 
+          type="email" 
+          formControlName="email" 
+          placeholder="exemplo@email.com"
+          [class.is-invalid]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid"
+        />
+        @if (loginForm.get('email')?.touched && loginForm.get('email')?.errors?.['required']) {
+          <span class="error-text">O e-mail é obrigatório.</span>
+        }
+        @if (loginForm.get('email')?.touched && loginForm.get('email')?.errors?.['email']) {
+          <span class="error-text">Insira um e-mail válido.</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input 
+          id="password" 
+          type="password" 
+          formControlName="password" 
+          placeholder="Sua senha"
+          [class.is-invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
+        />
+        @if (loginForm.get('password')?.touched && loginForm.get('password')?.errors?.['required']) {
+          <span class="error-text">A senha é obrigatória.</span>
+        }
+      </div>
+
+      @if (errorMessage) {
+        <div class="alert alert-danger">{{ errorMessage }}</div>
+      }
+
+      <button type="submit" [disabled]="isLoading">
+        {{ isLoading ? 'Entrando...' : 'Entrar' }}
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      Não tem uma conta? <a routerLink="/register">Cadastre-se</a>
+    </p>
+  </div>
+</div>
