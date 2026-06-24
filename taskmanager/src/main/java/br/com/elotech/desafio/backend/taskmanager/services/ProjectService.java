@@ -45,13 +45,11 @@ public class ProjectService {
         return new PagedModel<>(projects.map(projectMapper::projectToProjectGetDTO));
     }
 
-    @Cacheable(value = "projectsListCache", key = "'creator-' + #creatorId + '-' + #pageable.pageNumber")
     public PagedModel<ProjectGetDTO> getAllByCreator(UUID creatorId, Pageable pageable) {
         Page<Project> projects = projectRepository.findByCreatorId(creatorId, pageable);
         return new PagedModel<>(projects.map(projectMapper::projectToProjectGetDTO));
     }
 
-    @Cacheable(value = "projectsListCache", key = "'member-' + #memberId + '-' + #pageable.pageNumber")
     public PagedModel<ProjectGetDTO> getAllByMember(UUID memberId, Pageable pageable) {
         Page<Project> projects = projectRepository.findDistinctByMembersUserId(memberId, pageable);
         return new PagedModel<>(projects.map(projectMapper::projectToProjectGetDTO));
